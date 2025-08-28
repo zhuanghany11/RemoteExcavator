@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3.10
 
 import rclpy
 from rclpy.node import Node

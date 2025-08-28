@@ -1,0 +1,2639 @@
+#usda 1.0
+(
+    customLayerData = {
+        dictionary cameraSettings = {
+            dictionary Front = {
+                double3 position = (5, 0, 0)
+                double radius = 5
+            }
+            dictionary Perspective = {
+                double3 position = (-10.353052944802851, 20.062720057420634, 19.49240387075946)
+                double3 target = (107.01792781735716, -100.20601260495648, -104.1658476819233)
+            }
+            dictionary Right = {
+                double3 position = (2.603044778278897, -5, 2.1810000167574204)
+                double radius = 13.081129455566407
+            }
+            dictionary Top = {
+                double3 position = (2.172565414564952, 0.6180540275573747, 5)
+                double radius = 10.204740142822265
+            }
+            string boundCamera = "/OmniverseKit_Persp"
+        }
+        dictionary metricsAssembler = {
+            dictionary "/World/Shacman_F3000_Dump_Truck" = {
+            }
+            dictionary "/World/canyon" = {
+            }
+            dictionary "/World/rock" = {
+            }
+            dictionary "/World/scene" = {
+            }
+            dictionary "/World/scene_01" = {
+            }
+            dictionary "/World/simple" = {
+            }
+            dictionary "/World/simple_trans_0811" = {
+            }
+            dictionary "/World/uploads_files_171572_Komatsu_PC2000_8_packed" = {
+            }
+            dictionary "/World/uploads_files_171572_Komatsu_PC2000_8_packed_01" = {
+            }
+            int version = 1
+        }
+        dictionary omni_layer = {
+            string authoring_layer = "./CJLAZ_v1_20250607.usda"
+            dictionary locked = {
+            }
+            dictionary muteness = {
+            }
+        }
+        dictionary renderSettings = {
+            bool "rtx:ambientOcclusion:enabled" = 0
+            int "rtx:directLighting:sampledLighting:samplesPerPixel" = 1
+            bool "rtx:indirectDiffuse:enabled" = 0
+            bool "rtx:reflections:enabled" = 0
+            bool "rtx:translucency:enabled" = 0
+            double "rtx:translucency:worldEps" = 0.005
+        }
+    }
+    defaultPrim = "World"
+    endTimeCode = 360000
+    metersPerUnit = 1
+    startTimeCode = 0
+    timeCodesPerSecond = 50
+    upAxis = "Z"
+)
+
+over "Render" (
+    hide_in_stage_window = true
+)
+{
+    over "OmniverseKit"
+    {
+        over "HydraTextures"
+        {
+            over "Replicator"
+            {
+                over "PostRender"
+                {
+                }
+            }
+
+            over "Replicator_01"
+            {
+                over "PostRender"
+                {
+                }
+            }
+        }
+    }
+}
+
+def PhysicsScene "physicsScene" (
+    prepend apiSchemas = ["PhysxSceneAPI", "MaterialBindingAPI", "PhysxVehicleContextAPI"]
+)
+{
+    rel material:binding:physics = </physicsScene/defaultMaterial> (
+        bindMaterialAs = "strongerThanDescendants"
+    )
+    vector3f physics:gravityDirection = (0, 0, -1)
+    float physics:gravityMagnitude = 9.81
+    float physxScene:bounceThreshold = 0.5
+    uniform token physxScene:broadphaseType = "GPU"
+    bool physxScene:enableCCD = 0
+    bool physxScene:enableEnhancedDeterminism = 0
+    bool physxScene:enableGPUDynamics = 1
+    bool physxScene:enableSceneQuerySupport = 1
+    bool physxScene:enableStabilization = 1
+    float physxScene:frictionCorrelationDistance = 0.025
+    float physxScene:frictionOffsetThreshold = 0.04
+    uint physxScene:gpuCollisionStackSize = 67108864
+    uint physxScene:gpuFoundLostAggregatePairsCapacity = 33554432
+    uint physxScene:gpuFoundLostPairsCapacity = 2097152
+    uint physxScene:gpuHeapCapacity = 67108864
+    uint physxScene:gpuMaxNumPartitions = 8
+    uint physxScene:gpuMaxParticleContacts = 1048576
+    uint physxScene:gpuMaxRigidContactCount = 8388608
+    uint physxScene:gpuMaxRigidPatchCount = 163840
+    uint physxScene:gpuMaxSoftBodyContacts = 1048576
+    uint64 physxScene:gpuTempBufferCapacity = 16777216
+    uint physxScene:gpuTotalAggregatePairsCapacity = 2097152
+    bool physxScene:invertCollisionGroupFilter = 1
+    uniform uint physxScene:maxPositionIterationCount = 255
+    uniform uint physxScene:maxVelocityIterationCount = 255
+    uniform uint physxScene:minPositionIterationCount = 1
+    uniform uint physxScene:minVelocityIterationCount = 0
+    uniform token physxScene:solverType = "TGS"
+    uint physxScene:timeStepsPerSecond = 50
+    uniform token physxVehicleContext:longitudinalAxis = "posX"
+    uniform token physxVehicleContext:updateMode = "velocityChange"
+    uniform token physxVehicleContext:verticalAxis = "posZ"
+
+    def Material "defaultMaterial" (
+        prepend apiSchemas = ["PhysicsMaterialAPI", "PhysxMaterialAPI"]
+    )
+    {
+        float physics:dynamicFriction = 0.5
+        float physics:restitution = 0
+        float physics:staticFriction = 0.5
+        float physxMaterial:compliantContactDamping = 0
+        float physxMaterial:compliantContactStiffness = 0
+        uniform token physxMaterial:frictionCombineMode = "average"
+        bool physxMaterial:improvePatchFriction = 1
+        uniform token physxMaterial:restitutionCombineMode = "average"
+    }
+}
+
+def "World"
+{
+    def "Robots"
+    {
+        def "PC2000" (
+            prepend payload = @./assets/Komatsu_PC2000/PC2000_no_piston.usdc@
+        )
+        {
+            quatf xformOp:orient = (1, 0, 0, 0)
+            float3 xformOp:scale = (1, 1, 1)
+            double3 xformOp:translate = (8.421631813049316, 4.165594577789307, -0.0000017842745592133724)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+            over "forearm"
+            {
+                over "forearm"
+                {
+                }
+            }
+
+            over "shovel"
+            {
+                over "shovel"
+                {
+                }
+
+                over "shovelhatch"
+                {
+                }
+            }
+
+            over "mainarm"
+            {
+                over "mainarm"
+                {
+                }
+            }
+
+            over "main_body"
+            {
+                over "main_body"
+                {
+                }
+            }
+
+            over "tank"
+            {
+                over "tank"
+                {
+                }
+            }
+
+            over "Joints"
+            {
+                over "body_arm_joint"
+                {
+                    float drive:angular:physics:damping = 100000
+                    float drive:angular:physics:stiffness = 1000000
+                    float drive:angular:physics:targetPosition = 0
+                    float drive:angular:physics:targetVelocity = 0
+                }
+
+                over "tank_body_joint"
+                {
+                    float drive:angular:physics:damping = 100000
+                    float drive:angular:physics:stiffness = 1000000
+                }
+
+                over "arm_forearm_joint"
+                {
+                    float drive:angular:physics:damping = 100000
+                    float drive:angular:physics:stiffness = 1000000
+                }
+
+                over "forearm_shovel_joint"
+                {
+                    float drive:angular:physics:damping = 100000
+                    float drive:angular:physics:stiffness = 1000000
+                    token visibility = "invisible"
+                }
+            }
+        }
+    }
+
+    def "Walls" (
+        delete apiSchemas = ["OmniScriptingAPI"]
+        prepend apiSchemas = ["OmniScriptingAPI"]
+    )
+    {
+        uniform asset[] omni:scripting:scripts = [] (
+            customData = {
+                dictionary fileExts = {
+                    string "*.py" = "Python File"
+                }
+            }
+        )
+
+        def "ground" (
+            customData = {
+                dictionary omni = {
+                    dictionary kit = {
+                        bool locked = 1
+                    }
+                }
+            }
+            prepend payload = @./assets/Grid/default_environment.usd@
+        )
+        {
+            rel proxyPrim (
+                customData = {
+                    dictionary omni = {
+                        dictionary kit = {
+                            bool locked = 1
+                        }
+                    }
+                }
+            )
+            uniform token purpose (
+                customData = {
+                    dictionary omni = {
+                        dictionary kit = {
+                            bool locked = 1
+                        }
+                    }
+                }
+            )
+            token visibility (
+                customData = {
+                    dictionary omni = {
+                        dictionary kit = {
+                            bool locked = 1
+                        }
+                    }
+                }
+            )
+            quatf xformOp:orient = (1, 0, 0, 0) (
+                customData = {
+                    dictionary omni = {
+                        dictionary kit = {
+                            bool locked = 1
+                        }
+                    }
+                }
+            )
+            float3 xformOp:scale = (2, 2, 2) (
+                customData = {
+                    dictionary omni = {
+                        dictionary kit = {
+                            bool locked = 1
+                        }
+                    }
+                }
+            )
+            double3 xformOp:translate = (-158.10936083442618, 0, 0) (
+                customData = {
+                    dictionary omni = {
+                        dictionary kit = {
+                            bool locked = 1
+                        }
+                    }
+                }
+            )
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"] (
+                customData = {
+                    dictionary omni = {
+                        dictionary kit = {
+                            bool locked = 1
+                        }
+                    }
+                }
+            )
+
+            over "Looks" (
+                customData = {
+                    dictionary omni = {
+                        dictionary kit = {
+                            bool locked = 1
+                        }
+                    }
+                }
+            )
+            {
+                rel proxyPrim (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+                uniform token purpose (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+                token visibility (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+
+                over "theGrid" (
+                    prepend apiSchemas = ["PhysicsMaterialAPI"]
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+                {
+                    token outputs:displacement (
+                        customData = {
+                            dictionary omni = {
+                                dictionary kit = {
+                                    bool locked = 1
+                                }
+                            }
+                        }
+                    )
+                    token outputs:mdl:displacement (
+                        customData = {
+                            dictionary omni = {
+                                dictionary kit = {
+                                    bool locked = 1
+                                }
+                            }
+                        }
+                    )
+                    token outputs:mdl:surface (
+                        customData = {
+                            dictionary omni = {
+                                dictionary kit = {
+                                    bool locked = 1
+                                }
+                            }
+                        }
+                    )
+                    token outputs:mdl:volume (
+                        customData = {
+                            dictionary omni = {
+                                dictionary kit = {
+                                    bool locked = 1
+                                }
+                            }
+                        }
+                    )
+                    token outputs:surface (
+                        customData = {
+                            dictionary omni = {
+                                dictionary kit = {
+                                    bool locked = 1
+                                }
+                            }
+                        }
+                    )
+                    token outputs:volume (
+                        customData = {
+                            dictionary omni = {
+                                dictionary kit = {
+                                    bool locked = 1
+                                }
+                            }
+                        }
+                    )
+                    float physics:density (
+                        customData = {
+                            dictionary omni = {
+                                dictionary kit = {
+                                    bool locked = 1
+                                }
+                            }
+                        }
+                    )
+                    float physics:dynamicFriction = 1.8 (
+                        customData = {
+                            dictionary omni = {
+                                dictionary kit = {
+                                    bool locked = 1
+                                }
+                            }
+                        }
+                    )
+                    float physics:restitution (
+                        customData = {
+                            dictionary omni = {
+                                dictionary kit = {
+                                    bool locked = 1
+                                }
+                            }
+                        }
+                    )
+                    float physics:staticFriction = 2 (
+                        customData = {
+                            dictionary omni = {
+                                dictionary kit = {
+                                    bool locked = 1
+                                }
+                            }
+                        }
+                    )
+
+                    over "Shader" (
+                        customData = {
+                            dictionary omni = {
+                                dictionary kit = {
+                                    bool locked = 1
+                                }
+                            }
+                        }
+                    )
+                    {
+                        uniform token info:id (
+                            customData = {
+                                dictionary omni = {
+                                    dictionary kit = {
+                                        bool locked = 1
+                                    }
+                                }
+                            }
+                        )
+                        uniform token info:implementationSource (
+                            customData = {
+                                dictionary omni = {
+                                    dictionary kit = {
+                                        bool locked = 1
+                                    }
+                                }
+                            }
+                        )
+                        uniform asset info:mdl:sourceAsset (
+                            customData = {
+                                dictionary omni = {
+                                    dictionary kit = {
+                                        bool locked = 1
+                                    }
+                                }
+                            }
+                        )
+                        uniform token info:mdl:sourceAsset:subIdentifier (
+                            customData = {
+                                dictionary omni = {
+                                    dictionary kit = {
+                                        bool locked = 1
+                                    }
+                                }
+                            }
+                        )
+                        float inputs:albedo_add (
+                            customData = {
+                                dictionary omni = {
+                                    dictionary kit = {
+                                        bool locked = 1
+                                    }
+                                }
+                            }
+                        )
+                        color3f inputs:diffuse_color_constant (
+                            customData = {
+                                dictionary omni = {
+                                    dictionary kit = {
+                                        bool locked = 1
+                                    }
+                                }
+                            }
+                        )
+                        asset inputs:diffuse_texture (
+                            customData = {
+                                dictionary omni = {
+                                    dictionary kit = {
+                                        bool locked = 1
+                                    }
+                                }
+                            }
+                        )
+                        color3f inputs:diffuse_tint (
+                            customData = {
+                                dictionary omni = {
+                                    dictionary kit = {
+                                        bool locked = 1
+                                    }
+                                }
+                            }
+                        )
+                        color3f inputs:emissive_color (
+                            customData = {
+                                dictionary omni = {
+                                    dictionary kit = {
+                                        bool locked = 1
+                                    }
+                                }
+                            }
+                        )
+                        asset inputs:emissive_color_texture (
+                            customData = {
+                                dictionary omni = {
+                                    dictionary kit = {
+                                        bool locked = 1
+                                    }
+                                }
+                            }
+                        )
+                        float inputs:emissive_intensity (
+                            customData = {
+                                dictionary omni = {
+                                    dictionary kit = {
+                                        bool locked = 1
+                                    }
+                                }
+                            }
+                        )
+                        asset inputs:emissive_mask_texture (
+                            customData = {
+                                dictionary omni = {
+                                    dictionary kit = {
+                                        bool locked = 1
+                                    }
+                                }
+                            }
+                        )
+                        bool inputs:enable_emission (
+                            customData = {
+                                dictionary omni = {
+                                    dictionary kit = {
+                                        bool locked = 1
+                                    }
+                                }
+                            }
+                        )
+                        bool inputs:project_uvw (
+                            customData = {
+                                dictionary omni = {
+                                    dictionary kit = {
+                                        bool locked = 1
+                                    }
+                                }
+                            }
+                        )
+                        float inputs:specular_level (
+                            customData = {
+                                dictionary omni = {
+                                    dictionary kit = {
+                                        bool locked = 1
+                                    }
+                                }
+                            }
+                        )
+                        bool inputs:world_or_object (
+                            customData = {
+                                dictionary omni = {
+                                    dictionary kit = {
+                                        bool locked = 1
+                                    }
+                                }
+                            }
+                        )
+                        token outputs:out (
+                            customData = {
+                                dictionary omni = {
+                                    dictionary kit = {
+                                        bool locked = 1
+                                    }
+                                }
+                            }
+                        )
+                    }
+                }
+            }
+
+            over "GroundPlane" (
+                customData = {
+                    dictionary omni = {
+                        dictionary kit = {
+                            bool locked = 1
+                        }
+                    }
+                }
+            )
+            {
+                rel proxyPrim (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+                uniform token purpose (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+                token visibility (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+                quatf xformOp:orient (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+                float3 xformOp:scale = (1, 1, 1) (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+                double3 xformOp:translate (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+                uniform token[] xformOpOrder (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+
+                over "CollisionPlane" (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+                {
+                    uniform token axis (
+                        customData = {
+                            dictionary omni = {
+                                dictionary kit = {
+                                    bool locked = 1
+                                }
+                            }
+                        }
+                    )
+                    uniform bool doubleSided (
+                        customData = {
+                            dictionary omni = {
+                                dictionary kit = {
+                                    bool locked = 1
+                                }
+                            }
+                        }
+                    )
+                    float3[] extent (
+                        customData = {
+                            dictionary omni = {
+                                dictionary kit = {
+                                    bool locked = 1
+                                }
+                            }
+                        }
+                    )
+                    double length (
+                        customData = {
+                            dictionary omni = {
+                                dictionary kit = {
+                                    bool locked = 1
+                                }
+                            }
+                        }
+                    )
+                    uniform token orientation (
+                        customData = {
+                            dictionary omni = {
+                                dictionary kit = {
+                                    bool locked = 1
+                                }
+                            }
+                        }
+                    )
+                    bool physics:collisionEnabled (
+                        customData = {
+                            dictionary omni = {
+                                dictionary kit = {
+                                    bool locked = 1
+                                }
+                            }
+                        }
+                    )
+                    rel physics:simulationOwner (
+                        customData = {
+                            dictionary omni = {
+                                dictionary kit = {
+                                    bool locked = 1
+                                }
+                            }
+                        }
+                    )
+                    color3f[] primvars:displayColor (
+                        customData = {
+                            dictionary omni = {
+                                dictionary kit = {
+                                    bool locked = 1
+                                }
+                            }
+                        }
+                    )
+                    float[] primvars:displayOpacity (
+                        customData = {
+                            dictionary omni = {
+                                dictionary kit = {
+                                    bool locked = 1
+                                }
+                            }
+                        }
+                    )
+                    rel proxyPrim (
+                        customData = {
+                            dictionary omni = {
+                                dictionary kit = {
+                                    bool locked = 1
+                                }
+                            }
+                        }
+                    )
+                    uniform token purpose (
+                        customData = {
+                            dictionary omni = {
+                                dictionary kit = {
+                                    bool locked = 1
+                                }
+                            }
+                        }
+                    )
+                    token visibility (
+                        customData = {
+                            dictionary omni = {
+                                dictionary kit = {
+                                    bool locked = 1
+                                }
+                            }
+                        }
+                    )
+                    double width (
+                        customData = {
+                            dictionary omni = {
+                                dictionary kit = {
+                                    bool locked = 1
+                                }
+                            }
+                        }
+                    )
+                    quatf xformOp:orient = (1, 0, 0, 0) (
+                        customData = {
+                            dictionary omni = {
+                                dictionary kit = {
+                                    bool locked = 1
+                                }
+                            }
+                        }
+                    )
+                    float3 xformOp:scale = (0.01, 0.01, 0.01) (
+                        customData = {
+                            dictionary omni = {
+                                dictionary kit = {
+                                    bool locked = 1
+                                }
+                            }
+                        }
+                    )
+                    double3 xformOp:translate = (0, 0, 0) (
+                        customData = {
+                            dictionary omni = {
+                                dictionary kit = {
+                                    bool locked = 1
+                                }
+                            }
+                        }
+                    )
+                    uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"] (
+                        customData = {
+                            dictionary omni = {
+                                dictionary kit = {
+                                    bool locked = 1
+                                }
+                            }
+                        }
+                    )
+                }
+            }
+
+            over "Environment" (
+                customData = {
+                    dictionary omni = {
+                        dictionary kit = {
+                            bool locked = 1
+                        }
+                    }
+                }
+            )
+            {
+                rel material:binding (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+                rel proxyPrim (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+                uniform token purpose (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+                token visibility (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+                float3 xformOp:rotateZYX (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+                float3 xformOp:scale (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+                double3 xformOp:translate (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+                uniform token[] xformOpOrder (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+
+                over "Geometry" (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+                {
+                    vector3f[] accelerations (
+                        customData = {
+                            dictionary omni = {
+                                dictionary kit = {
+                                    bool locked = 1
+                                }
+                            }
+                        }
+                    )
+                    int[] cornerIndices (
+                        customData = {
+                            dictionary omni = {
+                                dictionary kit = {
+                                    bool locked = 1
+                                }
+                            }
+                        }
+                    )
+                    float[] cornerSharpnesses (
+                        customData = {
+                            dictionary omni = {
+                                dictionary kit = {
+                                    bool locked = 1
+                                }
+                            }
+                        }
+                    )
+                    int[] creaseIndices (
+                        customData = {
+                            dictionary omni = {
+                                dictionary kit = {
+                                    bool locked = 1
+                                }
+                            }
+                        }
+                    )
+                    int[] creaseLengths (
+                        customData = {
+                            dictionary omni = {
+                                dictionary kit = {
+                                    bool locked = 1
+                                }
+                            }
+                        }
+                    )
+                    float[] creaseSharpnesses (
+                        customData = {
+                            dictionary omni = {
+                                dictionary kit = {
+                                    bool locked = 1
+                                }
+                            }
+                        }
+                    )
+                    uniform bool doubleSided (
+                        customData = {
+                            dictionary omni = {
+                                dictionary kit = {
+                                    bool locked = 1
+                                }
+                            }
+                        }
+                    )
+                    float3[] extent (
+                        customData = {
+                            dictionary omni = {
+                                dictionary kit = {
+                                    bool locked = 1
+                                }
+                            }
+                        }
+                    )
+                    token faceVaryingLinearInterpolation (
+                        customData = {
+                            dictionary omni = {
+                                dictionary kit = {
+                                    bool locked = 1
+                                }
+                            }
+                        }
+                    )
+                    int[] faceVertexCounts (
+                        customData = {
+                            dictionary omni = {
+                                dictionary kit = {
+                                    bool locked = 1
+                                }
+                            }
+                        }
+                    )
+                    int[] faceVertexIndices (
+                        customData = {
+                            dictionary omni = {
+                                dictionary kit = {
+                                    bool locked = 1
+                                }
+                            }
+                        }
+                    )
+                    int[] holeIndices (
+                        customData = {
+                            dictionary omni = {
+                                dictionary kit = {
+                                    bool locked = 1
+                                }
+                            }
+                        }
+                    )
+                    token interpolateBoundary (
+                        customData = {
+                            dictionary omni = {
+                                dictionary kit = {
+                                    bool locked = 1
+                                }
+                            }
+                        }
+                    )
+                    normal3f[] normals (
+                        customData = {
+                            dictionary omni = {
+                                dictionary kit = {
+                                    bool locked = 1
+                                }
+                            }
+                        }
+                    )
+                    uniform token orientation (
+                        customData = {
+                            dictionary omni = {
+                                dictionary kit = {
+                                    bool locked = 1
+                                }
+                            }
+                        }
+                    )
+                    point3f[] points (
+                        customData = {
+                            dictionary omni = {
+                                dictionary kit = {
+                                    bool locked = 1
+                                }
+                            }
+                        }
+                    )
+                    color3f[] primvars:displayColor (
+                        customData = {
+                            dictionary omni = {
+                                dictionary kit = {
+                                    bool locked = 1
+                                }
+                            }
+                        }
+                    )
+                    float[] primvars:displayOpacity (
+                        customData = {
+                            dictionary omni = {
+                                dictionary kit = {
+                                    bool locked = 1
+                                }
+                            }
+                        }
+                    )
+                    texCoord2f[] primvars:st (
+                        customData = {
+                            dictionary omni = {
+                                dictionary kit = {
+                                    bool locked = 1
+                                }
+                            }
+                        }
+                    )
+                    rel proxyPrim (
+                        customData = {
+                            dictionary omni = {
+                                dictionary kit = {
+                                    bool locked = 1
+                                }
+                            }
+                        }
+                    )
+                    uniform token purpose (
+                        customData = {
+                            dictionary omni = {
+                                dictionary kit = {
+                                    bool locked = 1
+                                }
+                            }
+                        }
+                    )
+                    uniform token subdivisionScheme (
+                        customData = {
+                            dictionary omni = {
+                                dictionary kit = {
+                                    bool locked = 1
+                                }
+                            }
+                        }
+                    )
+                    token triangleSubdivisionRule (
+                        customData = {
+                            dictionary omni = {
+                                dictionary kit = {
+                                    bool locked = 1
+                                }
+                            }
+                        }
+                    )
+                    vector3f[] velocities (
+                        customData = {
+                            dictionary omni = {
+                                dictionary kit = {
+                                    bool locked = 1
+                                }
+                            }
+                        }
+                    )
+                    token visibility = "inherited" (
+                        customData = {
+                            dictionary omni = {
+                                dictionary kit = {
+                                    bool locked = 1
+                                }
+                            }
+                        }
+                    )
+                    quatd xformOp:orient (
+                        customData = {
+                            dictionary omni = {
+                                dictionary kit = {
+                                    bool locked = 1
+                                }
+                            }
+                        }
+                    )
+                    double3 xformOp:scale = (200, 100, 1) (
+                        customData = {
+                            dictionary omni = {
+                                dictionary kit = {
+                                    bool locked = 1
+                                }
+                            }
+                        }
+                    )
+                    double3 xformOp:translate = (0, 0, 0) (
+                        customData = {
+                            dictionary omni = {
+                                dictionary kit = {
+                                    bool locked = 1
+                                }
+                            }
+                        }
+                    )
+                    uniform token[] xformOpOrder (
+                        customData = {
+                            dictionary omni = {
+                                dictionary kit = {
+                                    bool locked = 1
+                                }
+                            }
+                        }
+                    )
+                }
+            }
+
+            over "SphereLight" (
+                customData = {
+                    dictionary omni = {
+                        dictionary kit = {
+                            bool locked = 1
+                        }
+                    }
+                }
+            )
+            {
+                rel collection:lightLink:excludes (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+                uniform token collection:lightLink:expansionRule (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+                uniform bool collection:lightLink:includeRoot (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+                rel collection:lightLink:includes (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+                rel collection:shadowLink:excludes (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+                uniform token collection:shadowLink:expansionRule (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+                uniform bool collection:shadowLink:includeRoot (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+                rel collection:shadowLink:includes (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+                float3[] extent (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+                color3f inputs:color (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+                float inputs:colorTemperature (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+                float inputs:diffuse (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+                bool inputs:enableColorTemperature (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+                float inputs:exposure (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+                float inputs:intensity (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+                bool inputs:normalize (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+                float inputs:radius (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+                float inputs:shaping:cone:angle (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+                float inputs:shaping:cone:softness (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+                float inputs:shaping:focus (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+                color3f inputs:shaping:focusTint (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+                float inputs:shaping:ies:angleScale (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+                asset inputs:shaping:ies:file (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+                bool inputs:shaping:ies:normalize (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+                float inputs:specular (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+                float intensity (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+                rel light:filters (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+                uniform token light:materialSyncMode (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+                uniform token light:shaderId (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+                rel proxyPrim (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+                uniform token purpose (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+                float radius (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+                float shaping:cone:angle (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+                float shaping:cone:softness (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+                float shaping:focus (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+                color3f shaping:focusTint (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+                asset shaping:ies:file (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+                bool treatAsPoint (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+                token visibility (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+                quatd xformOp:orient (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+                double3 xformOp:scale (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+                double3 xformOp:translate (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+                uniform token[] xformOpOrder (
+                    customData = {
+                        dictionary omni = {
+                            dictionary kit = {
+                                bool locked = 1
+                            }
+                        }
+                    }
+                )
+            }
+        }
+    }
+
+    def DomeLight "DomeLight" (
+        prepend apiSchemas = ["ShapingAPI"]
+    )
+    {
+        float inputs:intensity = 1000
+        float inputs:shaping:cone:angle = 180
+        float inputs:shaping:cone:softness
+        float inputs:shaping:focus
+        color3f inputs:shaping:focusTint
+        asset inputs:shaping:ies:file
+        token inputs:texture:format = "latlong"
+        quatd xformOp:orient = (1, 0, 0, 0)
+        double3 xformOp:scale = (1, 1, 1)
+        double3 xformOp:translate = (0, 0, 0)
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+    }
+
+    def Scope "Trucks"
+    {
+        token visibility = "inherited"
+
+        def "Shacman_F3000_Dump_Truck" (
+            delete apiSchemas = ["PhysicsRigidBodyAPI", "PhysxRigidBodyAPI"]
+            delete payload = @./usd/truck/Shacman_F3000_Dump_Truck.usdz@
+            prepend payload = @./assets/truck/Shacman_F3000_Dump_Truck.usdz@
+        )
+        {
+            quatf xformOp:orient = (0.70710677, 0, 0, 0.70710677)
+            double xformOp:rotateX:unitsResolve = 90
+            float3 xformOp:scale = (1, 1, 1)
+            double3 xformOp:scale:unitsResolve = (0.04, 0.04, 0.04)
+            double3 xformOp:translate = (-5.000000000000007, -1.8278073315951817, 2.62)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale", "xformOp:rotateX:unitsResolve", "xformOp:scale:unitsResolve"]
+
+            def OmniGraph "ROS2_OdomAndTF"
+            {
+                token evaluationMode = "Automatic"
+                token evaluator:type = "execution"
+                token fabricCacheBacking = "Shared"
+                int2 fileFormatVersion = (1, 9)
+                token pipelineStage = "pipelineStageSimulation"
+
+                def OmniGraphNode "ros2_context" (
+                    prepend apiSchemas = ["NodeGraphNodeAPI"]
+                )
+                {
+                    custom uchar inputs:domain_id
+                    custom bool inputs:useDomainIDEnvVar
+                    token node:type = "isaacsim.ros2.bridge.ROS2Context"
+                    int node:typeVersion = 2
+                    custom uint64 outputs:context
+                    uniform token ui:nodegraph:node:expansionState = "open"
+                    uniform float2 ui:nodegraph:node:pos = (983.70026, 374.2347)
+                }
+
+                def OmniGraphNode "on_playback_tick" (
+                    prepend apiSchemas = ["NodeGraphNodeAPI"]
+                )
+                {
+                    token node:type = "omni.graph.action.OnPlaybackTick"
+                    int node:typeVersion = 2
+                    custom double outputs:deltaSeconds
+                    custom double outputs:frame
+                    custom uint outputs:tick (
+                        customData = {
+                            bool isExecution = 1
+                        }
+                    )
+                    custom double outputs:time
+                    uniform token ui:nodegraph:node:expansionState = "open"
+                    uniform float2 ui:nodegraph:node:pos = (920.71674, 155.84721)
+                }
+
+                def OmniGraphNode "isaac_read_simulation_time" (
+                    prepend apiSchemas = ["NodeGraphNodeAPI"]
+                )
+                {
+                    custom bool inputs:resetOnStop
+                    custom int64 inputs:swhFrameNumber
+                    token node:type = "isaacsim.core.nodes.IsaacReadSimulationTime"
+                    int node:typeVersion = 1
+                    custom double outputs:simulationTime
+                    uniform token ui:nodegraph:node:expansionState = "open"
+                    uniform float2 ui:nodegraph:node:pos = (957.8771, 541.74335)
+                }
+
+                def OmniGraphNode "ros2_publish_transform_tree" (
+                    prepend apiSchemas = ["NodeGraphNodeAPI"]
+                )
+                {
+                    custom uint64 inputs:context
+                    prepend uint64 inputs:context.connect = </World/Trucks/Shacman_F3000_Dump_Truck/ROS2_OdomAndTF/ros2_context.outputs:context>
+                    custom uint inputs:execIn (
+                        customData = {
+                            bool isExecution = 1
+                        }
+                    )
+                    prepend uint inputs:execIn.connect = </World/Trucks/Shacman_F3000_Dump_Truck/ROS2_OdomAndTF/on_playback_tick.outputs:tick>
+                    custom string inputs:nodeNamespace
+                    custom rel inputs:parentPrim = </World/Walls/ground> (
+                        customData = {
+                            dictionary omni = {
+                                dictionary graph = {
+                                    string relType = "target"
+                                }
+                            }
+                        }
+                    )
+                    custom string inputs:qosProfile
+                    custom uint64 inputs:queueSize
+                    custom bool inputs:staticPublisher
+                    custom rel inputs:targetPrims = </World/Trucks/Shacman_F3000_Dump_Truck/Meshes/Sketchfab_model/root> (
+                        customData = {
+                            dictionary omni = {
+                                dictionary graph = {
+                                    string relType = "target"
+                                }
+                            }
+                        }
+                    )
+                    custom double inputs:timeStamp
+                    prepend double inputs:timeStamp.connect = </World/Trucks/Shacman_F3000_Dump_Truck/ROS2_OdomAndTF/isaac_read_simulation_time.outputs:simulationTime>
+                    custom string inputs:topicName
+                    token node:type = "isaacsim.ros2.bridge.ROS2PublishTransformTree"
+                    int node:typeVersion = 1
+                    uniform token ui:nodegraph:node:expansionState = "open"
+                    uniform float2 ui:nodegraph:node:pos = (1345.8794, 288.71725)
+                }
+            }
+
+            over "Meshes" (
+                delete apiSchemas = ["PhysicsRigidBodyAPI", "PhysxRigidBodyAPI"]
+            )
+            {
+                quatf xformOp:orient = (0.70710677, -0.70710677, 0, 0)
+                float3 xformOp:scale = (100, 100, 100)
+                double3 xformOp:translate = (0, 2.8421709430404007e-13, 0)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+                over "Sketchfab_model"
+                {
+                    matrix4d xformOp:transform = ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 0, 0, 1) )
+
+                    over "root" (
+                        prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysxRigidBodyAPI"]
+                    )
+                    {
+                        bool physics:kinematicEnabled = 0
+                        bool physics:rigidBodyEnabled = 1
+                        matrix4d xformOp:transform = ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 0, 0, 1) )
+
+                        over "GLTF_SceneRootNode"
+                        {
+                            over "Plane_008_7"
+                            {
+                                over "Object_4"
+                                {
+                                    over "Object_0" (
+                                        prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxConvexHullCollisionAPI", "PhysicsMeshCollisionAPI"]
+                                    )
+                                    {
+                                        uniform token physics:approximation = "convexHull"
+                                        bool physics:collisionEnabled = 1
+                                    }
+                                }
+
+                                over "Object_5"
+                                {
+                                    over "Object_1" (
+                                        prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxConvexHullCollisionAPI", "PhysicsMeshCollisionAPI"]
+                                    )
+                                    {
+                                        uniform token physics:approximation = "convexHull"
+                                        bool physics:collisionEnabled = 1
+                                    }
+                                }
+
+                                over "Object_6"
+                                {
+                                    over "Object_2" (
+                                        prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxConvexHullCollisionAPI", "PhysicsMeshCollisionAPI"]
+                                    )
+                                    {
+                                        uniform token physics:approximation = "convexHull"
+                                        bool physics:collisionEnabled = 1
+                                    }
+                                }
+
+                                over "Object_7"
+                                {
+                                    over "Object_3" (
+                                        prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxConvexHullCollisionAPI", "PhysicsMeshCollisionAPI"]
+                                    )
+                                    {
+                                        uniform token physics:approximation = "convexHull"
+                                        bool physics:collisionEnabled = 1
+                                    }
+                                }
+
+                                over "Object_8"
+                                {
+                                    over "Object_4" (
+                                        prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxConvexHullCollisionAPI", "PhysicsMeshCollisionAPI"]
+                                    )
+                                    {
+                                        uniform token physics:approximation = "convexHull"
+                                        bool physics:collisionEnabled = 1
+                                    }
+                                }
+
+                                over "Object_9"
+                                {
+                                    over "Object_5" (
+                                        prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxConvexHullCollisionAPI", "PhysicsMeshCollisionAPI"]
+                                    )
+                                    {
+                                        uniform token physics:approximation = "convexHull"
+                                        bool physics:collisionEnabled = 1
+                                    }
+                                }
+
+                                over "Object_10"
+                                {
+                                    over "Object_6" (
+                                        prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxConvexHullCollisionAPI", "PhysicsMeshCollisionAPI"]
+                                    )
+                                    {
+                                        uniform token physics:approximation = "convexHull"
+                                        bool physics:collisionEnabled = 1
+                                    }
+                                }
+
+                                over "Object_11"
+                                {
+                                    over "Object_7" (
+                                        prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxConvexHullCollisionAPI", "PhysicsMeshCollisionAPI"]
+                                    )
+                                    {
+                                        uniform token physics:approximation = "convexHull"
+                                        bool physics:collisionEnabled = 1
+                                    }
+                                }
+
+                                over "Object_12"
+                                {
+                                    over "Object_8" (
+                                        prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxConvexHullCollisionAPI", "PhysicsMeshCollisionAPI"]
+                                    )
+                                    {
+                                        uniform token physics:approximation = "convexHull"
+                                        bool physics:collisionEnabled = 1
+                                    }
+                                }
+
+                                over "Object_13"
+                                {
+                                    over "Object_9" (
+                                        prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxConvexHullCollisionAPI", "PhysicsMeshCollisionAPI"]
+                                    )
+                                    {
+                                        uniform token physics:approximation = "convexHull"
+                                        bool physics:collisionEnabled = 1
+                                    }
+                                }
+
+                                over "Object_14"
+                                {
+                                    over "Object_10" (
+                                        prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxConvexHullCollisionAPI", "PhysicsMeshCollisionAPI"]
+                                    )
+                                    {
+                                        uniform token physics:approximation = "convexHull"
+                                        bool physics:collisionEnabled = 1
+                                    }
+                                }
+
+                                over "Object_15"
+                                {
+                                    over "Object_11" (
+                                        prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxConvexHullCollisionAPI", "PhysicsMeshCollisionAPI"]
+                                    )
+                                    {
+                                        uniform token physics:approximation = "convexHull"
+                                        bool physics:collisionEnabled = 1
+                                    }
+                                }
+
+                                over "Object_16"
+                                {
+                                    over "Object_12" (
+                                        prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxConvexHullCollisionAPI", "PhysicsMeshCollisionAPI"]
+                                    )
+                                    {
+                                        uniform token physics:approximation = "convexHull"
+                                        bool physics:collisionEnabled = 1
+                                    }
+                                }
+
+                                over "Object_17"
+                                {
+                                    over "Object_13" (
+                                        prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxConvexHullCollisionAPI", "PhysicsMeshCollisionAPI"]
+                                    )
+                                    {
+                                        uniform token physics:approximation = "convexHull"
+                                        bool physics:collisionEnabled = 1
+                                    }
+                                }
+
+                                over "Object_18"
+                                {
+                                    over "Object_14" (
+                                        prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxConvexHullCollisionAPI", "PhysicsMeshCollisionAPI"]
+                                    )
+                                    {
+                                        uniform token physics:approximation = "convexHull"
+                                        bool physics:collisionEnabled = 1
+                                    }
+                                }
+
+                                over "Object_19"
+                                {
+                                    over "Object_15" (
+                                        prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxConvexHullCollisionAPI", "PhysicsMeshCollisionAPI"]
+                                    )
+                                    {
+                                        uniform token physics:approximation = "convexHull"
+                                        bool physics:collisionEnabled = 1
+                                    }
+                                }
+
+                                over "Object_20"
+                                {
+                                    over "Object_16" (
+                                        prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxConvexHullCollisionAPI", "PhysicsMeshCollisionAPI"]
+                                    )
+                                    {
+                                        uniform token physics:approximation = "convexHull"
+                                        bool physics:collisionEnabled = 1
+                                    }
+                                }
+
+                                over "Cylinder_020_0"
+                                {
+                                    over "Object_22"
+                                    {
+                                        over "Object_17" (
+                                            prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxConvexHullCollisionAPI", "PhysicsMeshCollisionAPI"]
+                                        )
+                                        {
+                                            uniform token physics:approximation = "convexHull"
+                                            bool physics:collisionEnabled = 1
+                                        }
+                                    }
+
+                                    over "Object_23"
+                                    {
+                                        over "Object_18" (
+                                            prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxConvexHullCollisionAPI", "PhysicsMeshCollisionAPI"]
+                                        )
+                                        {
+                                            uniform token physics:approximation = "convexHull"
+                                            bool physics:collisionEnabled = 1
+                                        }
+                                    }
+
+                                    over "Object_24"
+                                    {
+                                        over "Object_19" (
+                                            prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxConvexHullCollisionAPI", "PhysicsMeshCollisionAPI"]
+                                        )
+                                        {
+                                            uniform token physics:approximation = "convexHull"
+                                            bool physics:collisionEnabled = 1
+                                        }
+                                    }
+
+                                    over "Object_25"
+                                    {
+                                        over "Object_20" (
+                                            prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxConvexHullCollisionAPI", "PhysicsMeshCollisionAPI"]
+                                        )
+                                        {
+                                            uniform token physics:approximation = "convexHull"
+                                            bool physics:collisionEnabled = 1
+                                        }
+                                    }
+                                }
+
+                                over "Cylinder_021_1"
+                                {
+                                    over "Object_27"
+                                    {
+                                        over "Object_21" (
+                                            prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxConvexHullCollisionAPI", "PhysicsMeshCollisionAPI"]
+                                        )
+                                        {
+                                            uniform token physics:approximation = "convexHull"
+                                            bool physics:collisionEnabled = 1
+                                        }
+                                    }
+
+                                    over "Object_28"
+                                    {
+                                        over "Object_22" (
+                                            prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxConvexHullCollisionAPI", "PhysicsMeshCollisionAPI"]
+                                        )
+                                        {
+                                            uniform token physics:approximation = "convexHull"
+                                            bool physics:collisionEnabled = 1
+                                        }
+                                    }
+
+                                    over "Object_29"
+                                    {
+                                        over "Object_23" (
+                                            prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxConvexHullCollisionAPI", "PhysicsMeshCollisionAPI"]
+                                        )
+                                        {
+                                            uniform token physics:approximation = "convexHull"
+                                            bool physics:collisionEnabled = 1
+                                        }
+                                    }
+
+                                    over "Object_30"
+                                    {
+                                        over "Object_24" (
+                                            prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxConvexHullCollisionAPI", "PhysicsMeshCollisionAPI"]
+                                        )
+                                        {
+                                            uniform token physics:approximation = "convexHull"
+                                            bool physics:collisionEnabled = 1
+                                        }
+                                    }
+                                }
+
+                                over "Cylinder_022_2"
+                                {
+                                    over "Object_32"
+                                    {
+                                        over "Object_25" (
+                                            prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxConvexHullCollisionAPI", "PhysicsMeshCollisionAPI"]
+                                        )
+                                        {
+                                            uniform token physics:approximation = "convexHull"
+                                            bool physics:collisionEnabled = 1
+                                        }
+                                    }
+
+                                    over "Object_33"
+                                    {
+                                        over "Object_26" (
+                                            prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxConvexHullCollisionAPI", "PhysicsMeshCollisionAPI"]
+                                        )
+                                        {
+                                            uniform token physics:approximation = "convexHull"
+                                            bool physics:collisionEnabled = 1
+                                        }
+                                    }
+
+                                    over "Object_34"
+                                    {
+                                        over "Object_27" (
+                                            prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxConvexHullCollisionAPI", "PhysicsMeshCollisionAPI"]
+                                        )
+                                        {
+                                            uniform token physics:approximation = "convexHull"
+                                            bool physics:collisionEnabled = 1
+                                        }
+                                    }
+
+                                    over "Object_35"
+                                    {
+                                        over "Object_28" (
+                                            prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxConvexHullCollisionAPI", "PhysicsMeshCollisionAPI"]
+                                        )
+                                        {
+                                            uniform token physics:approximation = "convexHull"
+                                            bool physics:collisionEnabled = 1
+                                        }
+                                    }
+                                }
+
+                                over "Cylinder_023_3"
+                                {
+                                    over "Object_37"
+                                    {
+                                        over "Object_29" (
+                                            prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxConvexHullCollisionAPI", "PhysicsMeshCollisionAPI"]
+                                        )
+                                        {
+                                            uniform token physics:approximation = "convexHull"
+                                            bool physics:collisionEnabled = 1
+                                        }
+                                    }
+
+                                    over "Object_38"
+                                    {
+                                        over "Object_30" (
+                                            prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxConvexHullCollisionAPI", "PhysicsMeshCollisionAPI"]
+                                        )
+                                        {
+                                            uniform token physics:approximation = "convexHull"
+                                            bool physics:collisionEnabled = 1
+                                        }
+                                    }
+
+                                    over "Object_39"
+                                    {
+                                        over "Object_31" (
+                                            prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxConvexHullCollisionAPI", "PhysicsMeshCollisionAPI"]
+                                        )
+                                        {
+                                            uniform token physics:approximation = "convexHull"
+                                            bool physics:collisionEnabled = 1
+                                        }
+                                    }
+
+                                    over "Object_40"
+                                    {
+                                        over "Object_32" (
+                                            prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxConvexHullCollisionAPI", "PhysicsMeshCollisionAPI"]
+                                        )
+                                        {
+                                            uniform token physics:approximation = "convexHull"
+                                            bool physics:collisionEnabled = 1
+                                        }
+                                    }
+                                }
+
+                                over "Cylinder_024_4"
+                                {
+                                    over "Object_42"
+                                    {
+                                        over "Object_33" (
+                                            prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxConvexHullCollisionAPI", "PhysicsMeshCollisionAPI"]
+                                        )
+                                        {
+                                            uniform token physics:approximation = "convexHull"
+                                            bool physics:collisionEnabled = 1
+                                        }
+                                    }
+
+                                    over "Object_43"
+                                    {
+                                        over "Object_34" (
+                                            prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxConvexHullCollisionAPI", "PhysicsMeshCollisionAPI"]
+                                        )
+                                        {
+                                            uniform token physics:approximation = "convexHull"
+                                            bool physics:collisionEnabled = 1
+                                        }
+                                    }
+
+                                    over "Object_44"
+                                    {
+                                        over "Object_35" (
+                                            prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxConvexHullCollisionAPI", "PhysicsMeshCollisionAPI"]
+                                        )
+                                        {
+                                            uniform token physics:approximation = "convexHull"
+                                            bool physics:collisionEnabled = 1
+                                        }
+                                    }
+
+                                    over "Object_45"
+                                    {
+                                        over "Object_36" (
+                                            prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxConvexHullCollisionAPI", "PhysicsMeshCollisionAPI"]
+                                        )
+                                        {
+                                            uniform token physics:approximation = "convexHull"
+                                            bool physics:collisionEnabled = 1
+                                        }
+                                    }
+                                }
+
+                                over "Cylinder_025_5"
+                                {
+                                    over "Object_47"
+                                    {
+                                        over "Object_37" (
+                                            prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxConvexHullCollisionAPI", "PhysicsMeshCollisionAPI"]
+                                        )
+                                        {
+                                            uniform token physics:approximation = "convexHull"
+                                            bool physics:collisionEnabled = 1
+                                        }
+                                    }
+
+                                    over "Object_48"
+                                    {
+                                        over "Object_38" (
+                                            prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxConvexHullCollisionAPI", "PhysicsMeshCollisionAPI"]
+                                        )
+                                        {
+                                            uniform token physics:approximation = "convexHull"
+                                            bool physics:collisionEnabled = 1
+                                        }
+                                    }
+
+                                    over "Object_49"
+                                    {
+                                        over "Object_39" (
+                                            prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxConvexHullCollisionAPI", "PhysicsMeshCollisionAPI"]
+                                        )
+                                        {
+                                            uniform token physics:approximation = "convexHull"
+                                            bool physics:collisionEnabled = 1
+                                        }
+                                    }
+
+                                    over "Object_50"
+                                    {
+                                        over "Object_40" (
+                                            prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxConvexHullCollisionAPI", "PhysicsMeshCollisionAPI"]
+                                        )
+                                        {
+                                            uniform token physics:approximation = "convexHull"
+                                            bool physics:collisionEnabled = 1
+                                        }
+                                    }
+                                }
+
+                                over "Plane_009_6"
+                                {
+                                    over "Object_52"
+                                    {
+                                        over "Object_41" (
+                                            prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxConvexHullCollisionAPI", "PhysicsMeshCollisionAPI"]
+                                        )
+                                        {
+                                            uniform token physics:approximation = "convexHull"
+                                            bool physics:collisionEnabled = 1
+                                            quatf xformOp:orient = (1, 0, 0, 0)
+                                            float3 xformOp:scale = (1, 1, 1)
+                                            double3 xformOp:translate = (0, 0, 0)
+                                            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+                                        }
+                                    }
+                                }
+                            }
+
+                            over "Cylinder_004_9"
+                            {
+                                over "Object_54"
+                                {
+                                    over "Object_42" (
+                                        prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxConvexHullCollisionAPI", "PhysicsMeshCollisionAPI"]
+                                    )
+                                    {
+                                        uniform token physics:approximation = "convexHull"
+                                        bool physics:collisionEnabled = 1
+                                    }
+                                }
+
+                                over "Object_55"
+                                {
+                                    over "Object_43" (
+                                        prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxConvexHullCollisionAPI", "PhysicsMeshCollisionAPI"]
+                                    )
+                                    {
+                                        uniform token physics:approximation = "convexHull"
+                                        bool physics:collisionEnabled = 1
+                                    }
+                                }
+
+                                over "Object_56"
+                                {
+                                    over "Object_44" (
+                                        prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxConvexHullCollisionAPI", "PhysicsMeshCollisionAPI"]
+                                    )
+                                    {
+                                        uniform token physics:approximation = "convexHull"
+                                        bool physics:collisionEnabled = 1
+                                    }
+                                }
+
+                                over "Object_57"
+                                {
+                                    over "Object_45" (
+                                        prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxConvexHullCollisionAPI", "PhysicsMeshCollisionAPI"]
+                                    )
+                                    {
+                                        uniform token physics:approximation = "convexHull"
+                                        bool physics:collisionEnabled = 1
+                                    }
+                                }
+                            }
+
+                            over "Cylinder_003_10"
+                            {
+                                over "Object_59"
+                                {
+                                    over "Object_46" (
+                                        prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxConvexHullCollisionAPI", "PhysicsMeshCollisionAPI"]
+                                    )
+                                    {
+                                        uniform token physics:approximation = "convexHull"
+                                        bool physics:collisionEnabled = 1
+                                    }
+                                }
+
+                                over "Object_60"
+                                {
+                                    over "Object_47" (
+                                        prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxConvexHullCollisionAPI", "PhysicsMeshCollisionAPI"]
+                                    )
+                                    {
+                                        uniform token physics:approximation = "convexHull"
+                                        bool physics:collisionEnabled = 1
+                                    }
+                                }
+
+                                over "Object_61"
+                                {
+                                    over "Object_48" (
+                                        prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxConvexHullCollisionAPI", "PhysicsMeshCollisionAPI"]
+                                    )
+                                    {
+                                        uniform token physics:approximation = "convexHull"
+                                        bool physics:collisionEnabled = 1
+                                    }
+                                }
+
+                                over "Object_62"
+                                {
+                                    over "Object_49" (
+                                        prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxConvexHullCollisionAPI", "PhysicsMeshCollisionAPI"]
+                                    )
+                                    {
+                                        uniform token physics:approximation = "convexHull"
+                                        bool physics:collisionEnabled = 1
+                                    }
+                                }
+                            }
+
+                            over "Cylinder_002_11"
+                            {
+                                over "Object_64"
+                                {
+                                    over "Object_50" (
+                                        prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxConvexHullCollisionAPI", "PhysicsMeshCollisionAPI"]
+                                    )
+                                    {
+                                        uniform token physics:approximation = "convexHull"
+                                        bool physics:collisionEnabled = 1
+                                    }
+                                }
+
+                                over "Object_65"
+                                {
+                                    over "Object_51" (
+                                        prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxConvexHullCollisionAPI", "PhysicsMeshCollisionAPI"]
+                                    )
+                                    {
+                                        uniform token physics:approximation = "convexHull"
+                                        bool physics:collisionEnabled = 1
+                                    }
+                                }
+
+                                over "Object_66"
+                                {
+                                    over "Object_52" (
+                                        prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxConvexHullCollisionAPI", "PhysicsMeshCollisionAPI"]
+                                    )
+                                    {
+                                        uniform token physics:approximation = "convexHull"
+                                        bool physics:collisionEnabled = 1
+                                    }
+                                }
+
+                                over "Object_67"
+                                {
+                                    over "Object_53" (
+                                        prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxConvexHullCollisionAPI", "PhysicsMeshCollisionAPI"]
+                                    )
+                                    {
+                                        uniform token physics:approximation = "convexHull"
+                                        bool physics:collisionEnabled = 1
+                                    }
+                                }
+                            }
+
+                            over "Cylinder_001_12"
+                            {
+                                over "Object_69"
+                                {
+                                    over "Object_54" (
+                                        prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxConvexHullCollisionAPI", "PhysicsMeshCollisionAPI"]
+                                    )
+                                    {
+                                        uniform token physics:approximation = "convexHull"
+                                        bool physics:collisionEnabled = 1
+                                    }
+                                }
+
+                                over "Object_70"
+                                {
+                                    over "Object_55" (
+                                        prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxConvexHullCollisionAPI", "PhysicsMeshCollisionAPI"]
+                                    )
+                                    {
+                                        uniform token physics:approximation = "convexHull"
+                                        bool physics:collisionEnabled = 1
+                                    }
+                                }
+
+                                over "Object_71"
+                                {
+                                    over "Object_56" (
+                                        prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxConvexHullCollisionAPI", "PhysicsMeshCollisionAPI"]
+                                    )
+                                    {
+                                        uniform token physics:approximation = "convexHull"
+                                        bool physics:collisionEnabled = 1
+                                    }
+                                }
+
+                                over "Object_72"
+                                {
+                                    over "Object_57" (
+                                        prepend apiSchemas = ["PhysicsCollisionAPI", "PhysxCollisionAPI", "PhysxConvexHullCollisionAPI", "PhysicsMeshCollisionAPI"]
+                                    )
+                                    {
+                                        uniform token physics:approximation = "convexHull"
+                                        bool physics:collisionEnabled = 1
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+over "SphereLight_01"
+{
+}
+
+over "SphereLight_02"
+{
+}
+
+over "SphereLight_03"
+{
+}
+
+def OmniGraph "ROS2_PC2000_JointSubPub" (
+    active = true
+)
+{
+    token evaluationMode = "Automatic"
+    token evaluator:type = "execution"
+    token fabricCacheBacking = "Shared"
+    int2 fileFormatVersion = (1, 9)
+    token pipelineStage = "pipelineStageSimulation"
+
+    def OmniGraphNode "on_playback_tick" (
+        prepend apiSchemas = ["NodeGraphNodeAPI"]
+    )
+    {
+        token node:type = "omni.graph.action.OnPlaybackTick"
+        int node:typeVersion = 2
+        custom double outputs:deltaSeconds
+        custom double outputs:frame
+        custom uint outputs:tick (
+            customData = {
+                bool isExecution = 1
+            }
+        )
+        custom double outputs:time
+        uniform token ui:nodegraph:node:expansionState = "open"
+        uniform float2 ui:nodegraph:node:pos = (160.45587, -15.551296)
+    }
+
+    def OmniGraphNode "isaac_read_simulation_time" (
+        prepend apiSchemas = ["NodeGraphNodeAPI"]
+    )
+    {
+        custom bool inputs:resetOnStop
+        custom int64 inputs:swhFrameNumber
+        token node:type = "isaacsim.core.nodes.IsaacReadSimulationTime"
+        int node:typeVersion = 1
+        custom double outputs:simulationTime
+        uniform token ui:nodegraph:node:expansionState = "open"
+        uniform float2 ui:nodegraph:node:pos = (127.70266, 265.7767)
+    }
+
+    def OmniGraphNode "ros2_publish_joint_state" (
+        prepend apiSchemas = ["NodeGraphNodeAPI"]
+    )
+    {
+        custom uint64 inputs:context
+        custom uint inputs:execIn (
+            customData = {
+                bool isExecution = 1
+            }
+        )
+        prepend uint inputs:execIn.connect = [
+            </World/Walls/script_node/on_playback_tick.outputs:tick>,
+            </ROS2_PC2000_JointSubPub/on_playback_tick.outputs:tick>,
+        ]
+        custom string inputs:nodeNamespace
+        custom string inputs:qosProfile
+        prepend string inputs:qosProfile.connect = </ROS2_PC2000_JointSubPub/ros2_qos_profile.outputs:qosProfile>
+        custom uint64 inputs:queueSize
+        custom rel inputs:targetPrim = </World/Robots/PC2000/main_body/main_body> (
+            customData = {
+                dictionary omni = {
+                    dictionary graph = {
+                        string relType = "target"
+                    }
+                }
+            }
+        )
+        custom double inputs:timeStamp
+        prepend double inputs:timeStamp.connect = [
+            </World/Walls/script_node/isaac_read_simulation_time.outputs:simulationTime>,
+            </ROS2_PC2000_JointSubPub/isaac_read_simulation_time.outputs:simulationTime>,
+        ]
+        custom string inputs:topicName = "pc2000_joint_states"
+        token node:type = "isaacsim.ros2.bridge.ROS2PublishJointState"
+        int node:typeVersion = 1
+        uniform token ui:nodegraph:node:expansionState = "open"
+        uniform float2 ui:nodegraph:node:pos = (597.09326, -15.690743)
+    }
+
+    def OmniGraphNode "ros2_subscribe_joint_state" (
+        prepend apiSchemas = ["NodeGraphNodeAPI"]
+    )
+    {
+        custom uint64 inputs:context
+        custom uint inputs:execIn (
+            customData = {
+                bool isExecution = 1
+            }
+        )
+        prepend uint inputs:execIn.connect = [
+            </World/Walls/script_node/on_playback_tick.outputs:tick>,
+            </ROS2_PC2000_JointSubPub/on_playback_tick.outputs:tick>,
+        ]
+        custom string inputs:nodeNamespace
+        custom string inputs:qosProfile
+        custom uint64 inputs:queueSize
+        custom string inputs:topicName = "pc2000_joint_command"
+        token node:type = "isaacsim.ros2.bridge.ROS2SubscribeJointState"
+        int node:typeVersion = 2
+        custom double[] outputs:effortCommand
+        custom uint outputs:execOut (
+            customData = {
+                bool isExecution = 1
+            }
+        )
+        custom token[] outputs:jointNames
+        custom double[] outputs:positionCommand
+        custom double outputs:timeStamp
+        custom double[] outputs:velocityCommand
+        uniform token ui:nodegraph:node:expansionState = "open"
+        uniform float2 ui:nodegraph:node:pos = (599.5567, 265.55872)
+    }
+
+    def OmniGraphNode "articulation_controller" (
+        prepend apiSchemas = ["NodeGraphNodeAPI"]
+    )
+    {
+        custom double[] inputs:effortCommand
+        prepend double[] inputs:effortCommand.connect = [
+            </World/Walls/script_node/ros2_subscribe_joint_state.outputs:effortCommand>,
+            </ROS2_PC2000_JointSubPub/ros2_subscribe_joint_state.outputs:effortCommand>,
+        ]
+        custom uint inputs:execIn (
+            customData = {
+                bool isExecution = 1
+            }
+        )
+        prepend uint inputs:execIn.connect = [
+            </World/Walls/script_node/on_playback_tick.outputs:tick>,
+            </ROS2_PC2000_JointSubPub/ros2_subscribe_joint_state.outputs:execOut>,
+        ]
+        custom int[] inputs:jointIndices
+        custom token[] inputs:jointNames
+        prepend token[] inputs:jointNames.connect = [
+            </World/Walls/script_node/ros2_subscribe_joint_state.outputs:jointNames>,
+            </ROS2_PC2000_JointSubPub/ros2_subscribe_joint_state.outputs:jointNames>,
+        ]
+        custom double[] inputs:positionCommand
+        prepend double[] inputs:positionCommand.connect = [
+            </World/Walls/script_node/ros2_subscribe_joint_state.outputs:positionCommand>,
+            </ROS2_PC2000_JointSubPub/ros2_subscribe_joint_state.outputs:positionCommand>,
+        ]
+        custom string inputs:robotPath = ""
+        custom rel inputs:targetPrim = </World/Robots/PC2000/main_body/main_body> (
+            customData = {
+                dictionary omni = {
+                    dictionary graph = {
+                        string relType = "target"
+                    }
+                }
+            }
+        )
+        custom double[] inputs:velocityCommand
+        prepend double[] inputs:velocityCommand.connect = [
+            </World/Walls/script_node/ros2_subscribe_joint_state.outputs:velocityCommand>,
+            </ROS2_PC2000_JointSubPub/ros2_subscribe_joint_state.outputs:velocityCommand>,
+        ]
+        token node:type = "isaacsim.core.nodes.IsaacArticulationController"
+        int node:typeVersion = 1
+        uniform token ui:nodegraph:node:expansionState = "open"
+        uniform float2 ui:nodegraph:node:pos = (988.6542, 342.30618)
+    }
+}
+

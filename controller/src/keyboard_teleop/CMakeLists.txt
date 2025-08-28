@@ -26,6 +26,7 @@ endif()
 install(
   PROGRAMS
     src/keyboard_joint_publisher.py
+    src/keyboard_prismatic_publisher.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

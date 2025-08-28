@@ -4,3 +4,4 @@ controller/log/
 Komatsu_PC2000_originalOBJ_backup/
 *.pyc
 *.vscode/
+*.thumbs/
