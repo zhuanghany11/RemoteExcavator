@@ -40,7 +40,7 @@ class KeyboardPrismaticPublisher(Node):
         self.step_yaw = 0.1      # radians per tick
 
         # Limits (symmetric for simplicity)
-        self.lin_limit = 3.0     # meters
+        self.lin_limit = 0.5    # meters
         self.yaw_limit = math.pi # radians
 
         # Key states for continuous movement

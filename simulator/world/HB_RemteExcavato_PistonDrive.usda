@@ -7,8 +7,8 @@
                 double radius = 5
             }
             dictionary Perspective = {
-                double3 position = (-0.1423174916477895, -22.425939681578832, 22.59206181358603)
-                double3 target = (1.539348466854134, -6.485600677007776, -8.137137894532014)
+                double3 position = (20.541127418550282, 9.973835879458962, 14.029965987086616)
+                double3 target = (1.937348117749039, -35.15919088754294, -13.589201294974007)
             }
             dictionary Right = {
                 double3 position = (2.603044778278897, -5, 2.1810000167574204)
@@ -2480,7 +2480,7 @@ def "World"
     {
         quatf xformOp:orient = (1, 0, 0, 0)
         float3 xformOp:scale = (1, 1, 1)
-        double3 xformOp:translate = (-0.19783605635166168, -14.189003944396973, 3.475006451481022e-7)
+        double3 xformOp:translate = (11.59725237255802, -10.148563871878638, 3.475006451481022e-7)
         uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
 
         over "excavator"
@@ -2517,6 +2517,41 @@ def "World"
             {
                 over "main_body"
                 {
+                    def Camera "front_camera"
+                    {
+                        token cameraProjectionType = "pinhole" (
+                            allowedTokens = ["pinhole", "fisheyePolynomial", "fisheyeSpherical", "fisheyeKannalaBrandtK3", "fisheyeRadTanThinPrism", "omniDirectionalStereo", "generalizedProjection"]
+                        )
+                        float2 clippingRange = (0.01, 10000000)
+                        float focalLength = 3
+                        float focusDistance = 200
+                        float horizontalAperture = 20.955
+                        token projection = "perspective"
+                        uniform token purpose = "proxy"
+                        float verticalAperture = 15.2908
+                        token visibility = "inherited"
+                        quatd xformOp:orient = (0.9063077870366499, 0.4226182617406995, 0, 0)
+                        double3 xformOp:scale = (1, 1, 1)
+                        double3 xformOp:translate = (-1.1597614348620517, 1.814957614160841, 2.6498839292839858)
+                        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+                    }
+
+                    def Camera "left_camera"
+                    {
+                        token cameraProjectionType = "fisheyeSpherical" (
+                            allowedTokens = ["pinhole", "fisheyePolynomial", "fisheyeSpherical", "fisheyeKannalaBrandtK3", "fisheyeRadTanThinPrism", "omniDirectionalStereo", "generalizedProjection"]
+                        )
+                        float2 clippingRange = (0.01, 10000000)
+                        float focalLength = 2
+                        float focusDistance = 200
+                        float horizontalAperture = 20.955
+                        token projection = "perspective"
+                        float verticalAperture = 15.2908
+                        quatd xformOp:orient = (0.8076522191679418, 0.4668119022211298, -0.17889351681621862, -0.3127005763648582)
+                        double3 xformOp:scale = (1, 1, 1)
+                        double3 xformOp:translate = (1.4297702748608554, 0.8476516256817004, 1.504306658360994)
+                        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+                    }
                 }
             }
 
@@ -2546,12 +2581,18 @@ def "World"
 
             over "bucket"
             {
-                over "bucket"
+                over "bucket" (
+                    prepend apiSchemas = ["PhysxTriangleMeshCollisionAPI", "PhysxSDFMeshCollisionAPI"]
+                )
                 {
+                    uniform token physics:approximation = "sdf"
                 }
 
-                over "shovel"
+                over "shovel" (
+                    prepend apiSchemas = ["PhysxSDFMeshCollisionAPI"]
+                )
                 {
+                    uniform token physics:approximation = "sdf"
                 }
             }
 
@@ -2598,6 +2639,8 @@ def "World"
 
                 over "bucket_angle"
                 {
+                    float physics:lowerLimit = -45
+                    float physics:upperLimit = 45
                     float state:angular:physics:position = 0
                     float state:angular:physics:velocity = 0
                 }
@@ -2639,23 +2682,6 @@ def "World"
         )
         {
             asset inputs:texture:file = @@
-        }
-
-        def Camera "front_camera"
-        {
-            token cameraProjectionType = "pinhole" (
-                allowedTokens = ["pinhole", "fisheyePolynomial", "fisheyeSpherical", "fisheyeKannalaBrandtK3", "fisheyeRadTanThinPrism", "omniDirectionalStereo", "generalizedProjection"]
-            )
-            float2 clippingRange = (0.01, 10000000)
-            float focalLength = 3
-            float focusDistance = 200
-            float horizontalAperture = 20.955
-            token projection = "perspective"
-            float verticalAperture = 15.2908
-            quatd xformOp:orient = (0.9063077870366499, 0.4226182617406995, 0, 0)
-            double3 xformOp:scale = (1, 1, 1)
-            double3 xformOp:translate = (-1.187335669610148, 1.3572153480161866, 3.982038947683415)
-            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
         }
 
         def OmniGraph "ROS2_Camera"
@@ -2745,7 +2771,7 @@ def "World"
                 prepend apiSchemas = ["NodeGraphNodeAPI"]
             )
             {
-                custom rel inputs:cameraPrim = </World/PC2000_full/front_camera> (
+                custom rel inputs:cameraPrim = </World/PC2000_full/excavator/main_body/main_body/front_camera> (
                     customData = {
                         dictionary omni = {
                             dictionary graph = {
@@ -2792,7 +2818,7 @@ def "World"
                 prepend apiSchemas = ["NodeGraphNodeAPI"]
             )
             {
-                custom rel inputs:cameraPrim = </World/PC2000_full/left_camera> (
+                custom rel inputs:cameraPrim = </World/PC2000_full/excavator/main_body/main_body/left_camera> (
                     customData = {
                         dictionary omni = {
                             dictionary graph = {
@@ -2857,23 +2883,6 @@ def "World"
                 uniform token ui:nodegraph:node:expansionState = "open"
                 uniform float2 ui:nodegraph:node:pos = (994.1345, 335.2924)
             }
-        }
-
-        def Camera "left_camera"
-        {
-            token cameraProjectionType = "fisheyeSpherical" (
-                allowedTokens = ["pinhole", "fisheyePolynomial", "fisheyeSpherical", "fisheyeKannalaBrandtK3", "fisheyeRadTanThinPrism", "omniDirectionalStereo", "generalizedProjection"]
-            )
-            float2 clippingRange = (0.01, 10000000)
-            float focalLength = 2
-            float focusDistance = 200
-            float horizontalAperture = 20.955
-            token projection = "perspective"
-            float verticalAperture = 15.2908
-            quatd xformOp:orient = (0.6220841998403793, 0.3591604802364558, -0.3478559320125478, -0.6025041479599583)
-            double3 xformOp:scale = (1, 1, 1)
-            double3 xformOp:translate = (1.5592998580074013, -2.3561797022455693, 3.241165759576409)
-            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
         }
     }
 }
