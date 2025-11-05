@@ -7,8 +7,8 @@
                 double radius = 193.994580078125
             }
             dictionary Perspective = {
-                double3 position = (-0.34651507635093637, -35.887350604994516, 22.328017801314374)
-                double3 target = (44.99153586892008, 92.90155295444262, -56.294197053994736)
+                double3 position = (19.617218120300286, -7.32029965569402, 9.68934918614237)
+                double3 target = (12.540452581290168, -9.151715318734674, 4.4190447485712605)
             }
             dictionary Right = {
                 double3 position = (9.102229805280327, -50011.284248769734, 3.612152776691489)
@@ -154,7 +154,7 @@ def "Render" (
                 no_delete = true
             )
             {
-                rel camera = </World/PC2000_full/excavator/main_body/main_body/right_camera>
+                rel camera = </World/PC2000_full/excavator/main_body/main_body/front_camera>
                 token omni:rtx:background:source:texture:textureMode = "repeatMirrored"
                 token omni:rtx:background:source:type = "domeLight"
                 bool omni:rtx:dlss:frameGeneration = 0
@@ -221,6 +221,139 @@ def "Render" (
                 custom bool overrideClipRange = 0
                 uniform int2 resolution = (1280, 720)
             }
+
+            def RenderProduct "Replicator_07" (
+                prepend apiSchemas = ["OmniRtxSettingsCommonAdvancedAPI_1", "OmniRtxSettingsRtAdvancedAPI_1", "OmniRtxSettingsPtAdvancedAPI_1", "OmniRtxPostColorGradingAPI_1", "OmniRtxPostChromaticAberrationAPI_1", "OmniRtxPostBloomPhysicalAPI_1", "OmniRtxPostMatteObjectAPI_1", "OmniRtxPostCompositingAPI_1", "OmniRtxPostDofAPI_1", "OmniRtxPostMotionBlurAPI_1", "OmniRtxPostTvNoiseAPI_1", "OmniRtxPostTonemapIrayReinhardAPI_1", "OmniRtxPostDebugSettingsAPI_1", "OmniRtxDebugSettingsAPI_1"]
+                hide_in_stage_window = true
+                no_delete = true
+            )
+            {
+                rel camera = </World/PC2000_full/excavator/boom/boom/boom_camera>
+                custom string ogPostProcessPath = "/Render/OmniverseKit/HydraTextures/Replicator_07/PostRender"
+                bool omni:rtx:material:db:syncLoads = 1
+                bool omni:rtx:rt:ecoMode:enabled = 0
+                bool omni:rtx:scene:hydra:materialSyncLoads = 1
+                rel orderedVars = [
+                    </Render/Vars/LdrColorSD>,
+                    </Render/Vars/LdrColor>,
+                ]
+                custom bool overrideClipRange = 0
+                uniform int2 resolution = (1280, 720)
+            }
+
+            def RenderProduct "Replicator_08" (
+                prepend apiSchemas = ["OmniRtxSettingsCommonAdvancedAPI_1", "OmniRtxSettingsRtAdvancedAPI_1", "OmniRtxSettingsPtAdvancedAPI_1", "OmniRtxPostColorGradingAPI_1", "OmniRtxPostChromaticAberrationAPI_1", "OmniRtxPostBloomPhysicalAPI_1", "OmniRtxPostMatteObjectAPI_1", "OmniRtxPostCompositingAPI_1", "OmniRtxPostDofAPI_1", "OmniRtxPostMotionBlurAPI_1", "OmniRtxPostTvNoiseAPI_1", "OmniRtxPostTonemapIrayReinhardAPI_1", "OmniRtxPostDebugSettingsAPI_1", "OmniRtxDebugSettingsAPI_1"]
+                hide_in_stage_window = true
+                no_delete = true
+            )
+            {
+                rel camera = </World/PC2000_full/excavator/main_body/main_body/front_surround_camera>
+                custom string ogPostProcessPath = "/Render/OmniverseKit/HydraTextures/Replicator_08/PostRender"
+                bool omni:rtx:material:db:syncLoads = 1
+                bool omni:rtx:rt:ecoMode:enabled = 0
+                bool omni:rtx:scene:hydra:materialSyncLoads = 1
+                rel orderedVars = [
+                    </Render/Vars/LdrColorSD>,
+                    </Render/Vars/LdrColor>,
+                ]
+                custom bool overrideClipRange = 0
+                uniform int2 resolution = (1280, 720)
+            }
+
+            def RenderProduct "Replicator_09" (
+                prepend apiSchemas = ["OmniRtxSettingsCommonAdvancedAPI_1", "OmniRtxSettingsRtAdvancedAPI_1", "OmniRtxSettingsPtAdvancedAPI_1", "OmniRtxPostColorGradingAPI_1", "OmniRtxPostChromaticAberrationAPI_1", "OmniRtxPostBloomPhysicalAPI_1", "OmniRtxPostMatteObjectAPI_1", "OmniRtxPostCompositingAPI_1", "OmniRtxPostDofAPI_1", "OmniRtxPostMotionBlurAPI_1", "OmniRtxPostTvNoiseAPI_1", "OmniRtxPostTonemapIrayReinhardAPI_1", "OmniRtxPostDebugSettingsAPI_1", "OmniRtxDebugSettingsAPI_1"]
+                hide_in_stage_window = true
+                no_delete = true
+            )
+            {
+                rel camera = </World/PC2000_full/excavator/main_body/main_body/front_camera>
+                custom string ogPostProcessPath = "/Render/OmniverseKit/HydraTextures/Replicator_09/PostRender"
+                bool omni:rtx:material:db:syncLoads = 1
+                bool omni:rtx:rt:ecoMode:enabled = 0
+                bool omni:rtx:scene:hydra:materialSyncLoads = 1
+                rel orderedVars = [
+                    </Render/Vars/LdrColorSD>,
+                    </Render/Vars/LdrColor>,
+                ]
+                custom bool overrideClipRange = 0
+                uniform int2 resolution = (1280, 720)
+            }
+
+            def RenderProduct "Replicator_10" (
+                prepend apiSchemas = ["OmniRtxSettingsCommonAdvancedAPI_1", "OmniRtxSettingsRtAdvancedAPI_1", "OmniRtxSettingsPtAdvancedAPI_1", "OmniRtxPostColorGradingAPI_1", "OmniRtxPostChromaticAberrationAPI_1", "OmniRtxPostBloomPhysicalAPI_1", "OmniRtxPostMatteObjectAPI_1", "OmniRtxPostCompositingAPI_1", "OmniRtxPostDofAPI_1", "OmniRtxPostMotionBlurAPI_1", "OmniRtxPostTvNoiseAPI_1", "OmniRtxPostTonemapIrayReinhardAPI_1", "OmniRtxPostDebugSettingsAPI_1", "OmniRtxDebugSettingsAPI_1"]
+                hide_in_stage_window = true
+                no_delete = true
+            )
+            {
+                rel camera = </World/PC2000_full/excavator/main_body/main_body/left_camera>
+                custom string ogPostProcessPath = "/Render/OmniverseKit/HydraTextures/Replicator_10/PostRender"
+                bool omni:rtx:material:db:syncLoads = 1
+                bool omni:rtx:rt:ecoMode:enabled = 0
+                bool omni:rtx:scene:hydra:materialSyncLoads = 1
+                rel orderedVars = [
+                    </Render/Vars/LdrColorSD>,
+                    </Render/Vars/LdrColor>,
+                ]
+                custom bool overrideClipRange = 0
+                uniform int2 resolution = (1280, 720)
+            }
+
+            def RenderProduct "Replicator_11" (
+                prepend apiSchemas = ["OmniRtxSettingsCommonAdvancedAPI_1", "OmniRtxSettingsRtAdvancedAPI_1", "OmniRtxSettingsPtAdvancedAPI_1", "OmniRtxPostColorGradingAPI_1", "OmniRtxPostChromaticAberrationAPI_1", "OmniRtxPostBloomPhysicalAPI_1", "OmniRtxPostMatteObjectAPI_1", "OmniRtxPostCompositingAPI_1", "OmniRtxPostDofAPI_1", "OmniRtxPostMotionBlurAPI_1", "OmniRtxPostTvNoiseAPI_1", "OmniRtxPostTonemapIrayReinhardAPI_1", "OmniRtxPostDebugSettingsAPI_1", "OmniRtxDebugSettingsAPI_1"]
+                hide_in_stage_window = true
+                no_delete = true
+            )
+            {
+                rel camera = </World/PC2000_full/excavator/main_body/main_body/rear_camera>
+                custom string ogPostProcessPath = "/Render/OmniverseKit/HydraTextures/Replicator_11/PostRender"
+                bool omni:rtx:material:db:syncLoads = 1
+                bool omni:rtx:rt:ecoMode:enabled = 0
+                bool omni:rtx:scene:hydra:materialSyncLoads = 1
+                rel orderedVars = [
+                    </Render/Vars/LdrColorSD>,
+                    </Render/Vars/LdrColor>,
+                ]
+                custom bool overrideClipRange = 0
+                uniform int2 resolution = (1280, 720)
+            }
+
+            def RenderProduct "Replicator_12" (
+                prepend apiSchemas = ["OmniRtxSettingsCommonAdvancedAPI_1", "OmniRtxSettingsRtAdvancedAPI_1", "OmniRtxSettingsPtAdvancedAPI_1", "OmniRtxPostColorGradingAPI_1", "OmniRtxPostChromaticAberrationAPI_1", "OmniRtxPostBloomPhysicalAPI_1", "OmniRtxPostMatteObjectAPI_1", "OmniRtxPostCompositingAPI_1", "OmniRtxPostDofAPI_1", "OmniRtxPostMotionBlurAPI_1", "OmniRtxPostTvNoiseAPI_1", "OmniRtxPostTonemapIrayReinhardAPI_1", "OmniRtxPostDebugSettingsAPI_1", "OmniRtxDebugSettingsAPI_1"]
+                hide_in_stage_window = true
+                no_delete = true
+            )
+            {
+                rel camera = </World/PC2000_full/excavator/main_body/main_body/right_camera>
+                custom string ogPostProcessPath = "/Render/OmniverseKit/HydraTextures/Replicator_12/PostRender"
+                bool omni:rtx:material:db:syncLoads = 1
+                bool omni:rtx:rt:ecoMode:enabled = 0
+                bool omni:rtx:scene:hydra:materialSyncLoads = 1
+                rel orderedVars = [
+                    </Render/Vars/LdrColorSD>,
+                    </Render/Vars/LdrColor>,
+                ]
+                custom bool overrideClipRange = 0
+                uniform int2 resolution = (1280, 720)
+            }
+
+            def RenderProduct "Replicator_13" (
+                prepend apiSchemas = ["OmniRtxSettingsCommonAdvancedAPI_1", "OmniRtxSettingsRtAdvancedAPI_1", "OmniRtxSettingsPtAdvancedAPI_1", "OmniRtxPostColorGradingAPI_1", "OmniRtxPostChromaticAberrationAPI_1", "OmniRtxPostBloomPhysicalAPI_1", "OmniRtxPostMatteObjectAPI_1", "OmniRtxPostCompositingAPI_1", "OmniRtxPostDofAPI_1", "OmniRtxPostMotionBlurAPI_1", "OmniRtxPostTvNoiseAPI_1", "OmniRtxPostTonemapIrayReinhardAPI_1", "OmniRtxPostDebugSettingsAPI_1", "OmniRtxDebugSettingsAPI_1"]
+                hide_in_stage_window = true
+                no_delete = true
+            )
+            {
+                rel camera = </World/PC2000_full/excavator/main_body/main_body/Airy_new>
+                custom string ogPostProcessPath = "/Render/OmniverseKit/HydraTextures/Replicator_13/PostRender"
+                bool omni:rtx:material:db:syncLoads = 1
+                bool omni:rtx:rt:ecoMode:enabled = 0
+                bool omni:rtx:scene:hydra:materialSyncLoads = 1
+                rel orderedVars = [
+                    </Render/Vars/GenericModelOutput>,
+                    </Render/Vars/RtxSensorMetadata>,
+                ]
+                custom bool overrideClipRange = 0
+                uniform int2 resolution = (1280, 720)
+            }
         }
     }
 
@@ -234,6 +367,13 @@ def "Render" (
             </Render/OmniverseKit/HydraTextures/omni_kit_widget_viewport_ViewportTexture_1>,
             </Render/OmniverseKit/HydraTextures/Replicator_05>,
             </Render/OmniverseKit/HydraTextures/Replicator_06>,
+            </Render/OmniverseKit/HydraTextures/Replicator_07>,
+            </Render/OmniverseKit/HydraTextures/Replicator_08>,
+            </Render/OmniverseKit/HydraTextures/Replicator_09>,
+            </Render/OmniverseKit/HydraTextures/Replicator_10>,
+            </Render/OmniverseKit/HydraTextures/Replicator_11>,
+            </Render/OmniverseKit/HydraTextures/Replicator_12>,
+            </Render/OmniverseKit/HydraTextures/Replicator_13>,
         ]
     }
 
@@ -2636,6 +2776,24 @@ def "World"
             {
                 over "boom"
                 {
+                    def Camera "boom_camera"
+                    {
+                        token cameraProjectionType = "fisheyeSpherical" (
+                            allowedTokens = ["pinhole", "fisheyePolynomial", "fisheyeSpherical", "fisheyeKannalaBrandtK3", "fisheyeRadTanThinPrism", "omniDirectionalStereo", "generalizedProjection"]
+                        )
+                        float2 clippingRange = (0.01, 10000000)
+                        float focalLength = 3
+                        float focusDistance = 200
+                        float horizontalAperture = 20.955
+                        token projection = "perspective"
+                        uniform token purpose = "proxy"
+                        float verticalAperture = 15.2908
+                        token visibility = "inherited"
+                        quatd xformOp:orient = (0.9063077870366499, 0.4226182617406995, 0, 0)
+                        double3 xformOp:scale = (1, 1, 1)
+                        double3 xformOp:translate = (-0.3001642288066382, 2.993306594894813, 2.2971639376885884)
+                        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+                    }
                 }
             }
 
@@ -2671,13 +2829,14 @@ def "World"
                         float focalLength = 3
                         float focusDistance = 200
                         float horizontalAperture = 20.955
+                        custom uniform vector3d omni:kit:centerOfInterest = (0, 0, -200.05166350469725)
                         token projection = "perspective"
                         uniform token purpose = "proxy"
                         float verticalAperture = 15.2908
                         token visibility = "inherited"
                         quatd xformOp:orient = (0.9063077870366499, 0.4226182617406995, 0, 0)
                         double3 xformOp:scale = (1, 1, 1)
-                        double3 xformOp:translate = (-1.1597614348620517, 1.488372334520589, 2.6498839292839858)
+                        double3 xformOp:translate = (1.0588359090918438, 1.6508794483708744, 4.645716094910354)
                         uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
                     }
 
@@ -2693,9 +2852,9 @@ def "World"
                         custom uniform vector3d omni:kit:centerOfInterest = (0, 0, -22.514378575829085)
                         token projection = "perspective"
                         float verticalAperture = 15.2908
-                        quatd xformOp:orient = (0.4948865874224122, 0.4733073105417204, 0.49374442787881323, 0.5359887081980236)
+                        quatd xformOp:orient = (0.47257406151235665, 0.4513552609301849, 0.5320161993465236, 0.5384337920759061)
                         double3 xformOp:scale = (1, 1, 1)
-                        double3 xformOp:translate = (-1.7944844668520101, 0.907453264850913, 2.8132256179169364)
+                        double3 xformOp:translate = (-1.9154799283951327, -0.5042370958771283, 0.5842410635047615)
                         uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
                     }
 
@@ -2715,11 +2874,13 @@ def "World"
                         token visibility = "inherited"
                         quatd xformOp:orient = (0.5188615373764704, 0.436819676962613, -0.4579861227488277, -0.5746477061810131)
                         double3 xformOp:scale = (1, 1, 1)
-                        double3 xformOp:translate = (-0.4887732831520122, 0.9518946735876934, 2.455165238232646)
+                        double3 xformOp:translate = (1.7383786860500887, -1.3905137057434889, 1.0178912190925207)
                         uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
                     }
 
-                    def Camera "rear_camera"
+                    def Camera "rear_camera" (
+                        instanceable = false
+                    )
                     {
                         token cameraProjectionType = "fisheyeSpherical" (
                             allowedTokens = ["pinhole", "fisheyePolynomial", "fisheyeSpherical", "fisheyeKannalaBrandtK3", "fisheyeRadTanThinPrism", "omniDirectionalStereo", "generalizedProjection"]
@@ -2733,13 +2894,13 @@ def "World"
                         uniform token purpose = "proxy"
                         float verticalAperture = 15.2908
                         token visibility = "inherited"
-                        quatd xformOp:orient = (0.18117061650518768, -0.03936894802650241, -0.5333744606323728, -0.8253114432694743)
+                        quatd xformOp:orient = (0.07603953166960017, -0.03328744169996985, 0.6552795467314425, 0.7508119947656499)
                         double3 xformOp:scale = (1, 1, 1)
-                        double3 xformOp:translate = (-0.5076807534575121, -1.6526591367318328, 4.266916282748948)
+                        double3 xformOp:translate = (-0.5198604596602419, -3.888756090133631, 1.07606124585921)
                         uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
                     }
 
-                    def Camera "boom_camera"
+                    def Camera "front_surround_camera"
                     {
                         token cameraProjectionType = "pinhole" (
                             allowedTokens = ["pinhole", "fisheyePolynomial", "fisheyeSpherical", "fisheyeKannalaBrandtK3", "fisheyeRadTanThinPrism", "omniDirectionalStereo", "generalizedProjection"]
@@ -2754,7 +2915,17 @@ def "World"
                         token visibility = "inherited"
                         quatd xformOp:orient = (0.9063077870366499, 0.4226182617406995, 0, 0)
                         double3 xformOp:scale = (1, 1, 1)
-                        double3 xformOp:translate = (0.2857737520139292, 2.823892313158775, 2.392856260887682)
+                        double3 xformOp:translate = (-0.32450052271159, 1.4203330915328607, 3.1569056671842235)
+                        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+                    }
+
+                    def "Airy_new" (
+                        prepend payload = @../../../../../isaacsim/exts/isaacsim.sensors.rtx/data/lidar_configs/Robosense/Airy_new.usd@
+                    )
+                    {
+                        quatf xformOp:orient = (0.88326997, -0.46886477, -0.000005277877, -0.0000010798168)
+                        float3 xformOp:scale = (1, 1, 1)
+                        double3 xformOp:translate = (-0.7639601125948428, 1.2797993482752972, 3.223327626456487)
                         uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
                     }
                 }
@@ -3243,7 +3414,7 @@ def "World"
                 prepend apiSchemas = ["NodeGraphNodeAPI"]
             )
             {
-                custom rel inputs:cameraPrim = </World/PC2000_full/excavator/main_body/main_body/boom_camera> (
+                custom rel inputs:cameraPrim = </World/PC2000_full/excavator/boom/boom/boom_camera> (
                     customData = {
                         dictionary omni = {
                             dictionary graph = {
@@ -3270,7 +3441,7 @@ def "World"
                 )
                 custom token outputs:renderProductPath
                 uniform token ui:nodegraph:node:expansionState = "open"
-                uniform float2 ui:nodegraph:node:pos = (510.65634, 1746.4509)
+                uniform float2 ui:nodegraph:node:pos = (510.65634, 1749.7843)
             }
 
             def OmniGraphNode "ros2_camera_helper_04" (
@@ -3317,6 +3488,88 @@ def "World"
                 int node:typeVersion = 2
                 uniform token ui:nodegraph:node:expansionState = "open"
                 uniform float2 ui:nodegraph:node:pos = (954.1355, 1675.2944)
+            }
+
+            def OmniGraphNode "isaac_create_render_product_05" (
+                prepend apiSchemas = ["NodeGraphNodeAPI"]
+            )
+            {
+                custom rel inputs:cameraPrim = </World/PC2000_full/excavator/main_body/main_body/front_surround_camera> (
+                    customData = {
+                        dictionary omni = {
+                            dictionary graph = {
+                                string relType = "target"
+                            }
+                        }
+                    }
+                )
+                custom bool inputs:enabled
+                custom uint inputs:execIn (
+                    customData = {
+                        bool isExecution = 1
+                    }
+                )
+                prepend uint inputs:execIn.connect = </World/PC2000_full/ROS2_Camera/isaac_run_one_simulation_frame.outputs:step>
+                custom uint inputs:height
+                custom uint inputs:width
+                token node:type = "isaacsim.core.nodes.IsaacCreateRenderProduct"
+                int node:typeVersion = 2
+                custom uint outputs:execOut (
+                    customData = {
+                        bool isExecution = 1
+                    }
+                )
+                custom token outputs:renderProductPath
+                uniform token ui:nodegraph:node:expansionState = "open"
+                uniform float2 ui:nodegraph:node:pos = (510.6566, 2223.1165)
+            }
+
+            def OmniGraphNode "ros2_camera_helper_05" (
+                prepend apiSchemas = ["NodeGraphNodeAPI"]
+            )
+            {
+                custom uint64 inputs:context
+                prepend uint64 inputs:context.connect = </World/PC2000_full/ROS2_Camera/ros2_context.outputs:context>
+                custom bool inputs:enabled
+                custom bool inputs:enableSemanticLabels
+                custom uint inputs:execIn (
+                    customData = {
+                        bool isExecution = 1
+                    }
+                )
+                delete uint inputs:execIn.connect = [
+                    </World/PC2000_full/ROS2_Camera/isaac_create_render_product_01.outputs:execOut>,
+                    </World/PC2000_full/ROS2_Camera/isaac_create_render_product_02.outputs:execOut>,
+                    </World/PC2000_full/ROS2_Camera/isaac_create_render_product_03.outputs:execOut>,
+                    </World/PC2000_full/ROS2_Camera/isaac_create_render_product_04.outputs:execOut>,
+                ]
+                prepend uint inputs:execIn.connect = </World/PC2000_full/ROS2_Camera/isaac_create_render_product_05.outputs:execOut>
+                custom string inputs:frameId = "front_surround_camera"
+                custom uint inputs:frameSkipCount
+                custom string inputs:nodeNamespace
+                custom string inputs:qosProfile
+                custom uint64 inputs:queueSize
+                custom token inputs:renderProductPath
+                delete token inputs:renderProductPath.connect = [
+                    </World/PC2000_full/ROS2_Camera/isaac_create_render_product_01.outputs:renderProductPath>,
+                    </World/PC2000_full/ROS2_Camera/isaac_create_render_product_02.outputs:renderProductPath>,
+                    </World/PC2000_full/ROS2_Camera/isaac_create_render_product_03.outputs:renderProductPath>,
+                    </World/PC2000_full/ROS2_Camera/isaac_create_render_product_04.outputs:renderProductPath>,
+                ]
+                prepend token inputs:renderProductPath.connect = </World/PC2000_full/ROS2_Camera/isaac_create_render_product_05.outputs:renderProductPath>
+                custom bool inputs:resetSimulationTimeOnStop
+                custom string inputs:semanticLabelsTopicName
+                custom float2 inputs:stereoOffset
+                custom string inputs:topicName = "front_surround_camera"
+                custom token inputs:type (
+                    allowedTokens = ["rgb", "depth", "depth_pcl", "instance_segmentation", "semantic_segmentation", "bbox_2d_tight", "bbox_2d_loose", "bbox_3d", "camera_info"]
+                )
+                custom bool inputs:useSystemTime
+                custom token inputs:viewport
+                token node:type = "isaacsim.ros2.bridge.ROS2CameraHelper"
+                int node:typeVersion = 2
+                uniform token ui:nodegraph:node:expansionState = "open"
+                uniform float2 ui:nodegraph:node:pos = (954.13574, 2148.6265)
             }
         }
     }
@@ -3521,6 +3774,121 @@ def OmniGraph "ROS2_JointSubPub" (
         custom uint64 outputs:context
         uniform token ui:nodegraph:node:expansionState = "open"
         uniform float2 ui:nodegraph:node:pos = (226.25694, -29.474924)
+    }
+}
+
+def "Graph"
+{
+    def OmniGraph "ROS_LidarRTX"
+    {
+        token evaluationMode = "Automatic"
+        token evaluator:type = "execution"
+        token fabricCacheBacking = "StageWithoutHistory"
+        int2 fileFormatVersion = (1, 9)
+        token pipelineStage = "pipelineStageSimulation"
+
+        def OmniGraphNode "OnPlaybackTick"
+        {
+            token node:type = "omni.graph.action.OnPlaybackTick"
+            int node:typeVersion = 2
+            custom double outputs:deltaSeconds
+            custom double outputs:frame
+            custom uint outputs:tick (
+                customData = {
+                    bool isExecution = 1
+                }
+            )
+            custom double outputs:time
+        }
+
+        def OmniGraphNode "RunOnce"
+        {
+            custom uint inputs:execIn (
+                customData = {
+                    bool isExecution = 1
+                }
+            )
+            prepend uint inputs:execIn.connect = </Graph/ROS_LidarRTX/OnPlaybackTick.outputs:tick>
+            token node:type = "isaacsim.core.nodes.OgnIsaacRunOneSimulationFrame"
+            int node:typeVersion = 1
+            custom uint outputs:step (
+                customData = {
+                    bool isExecution = 1
+                }
+            )
+        }
+
+        def OmniGraphNode "RenderProduct"
+        {
+            custom rel inputs:cameraPrim = </World/PC2000_full/excavator/main_body/main_body/Airy_new> (
+                customData = {
+                    dictionary omni = {
+                        dictionary graph = {
+                            string relType = "target"
+                        }
+                    }
+                }
+            )
+            custom bool inputs:enabled
+            custom uint inputs:execIn (
+                customData = {
+                    bool isExecution = 1
+                }
+            )
+            prepend uint inputs:execIn.connect = </Graph/ROS_LidarRTX/RunOnce.outputs:step>
+            custom uint inputs:height
+            custom uint inputs:width
+            token node:type = "isaacsim.core.nodes.IsaacCreateRenderProduct"
+            int node:typeVersion = 2
+            custom uint outputs:execOut (
+                customData = {
+                    bool isExecution = 1
+                }
+            )
+            custom token outputs:renderProductPath
+        }
+
+        def OmniGraphNode "Context"
+        {
+            custom uchar inputs:domain_id
+            custom bool inputs:useDomainIDEnvVar
+            token node:type = "isaacsim.ros2.bridge.ROS2Context"
+            int node:typeVersion = 2
+            custom uint64 outputs:context
+        }
+
+        def OmniGraphNode "LaserScanPublish" (
+            prepend apiSchemas = ["NodeGraphNodeAPI"]
+        )
+        {
+            custom uint64 inputs:context
+            prepend uint64 inputs:context.connect = </Graph/ROS_LidarRTX/Context.outputs:context>
+            custom bool inputs:enabled
+            custom uint inputs:execIn (
+                customData = {
+                    bool isExecution = 1
+                }
+            )
+            prepend uint inputs:execIn.connect = </Graph/ROS_LidarRTX/RenderProduct.outputs:execOut>
+            custom string inputs:frameId = "robosense_airy_link"
+            custom uint inputs:frameSkipCount
+            custom bool inputs:fullScan
+            custom string inputs:nodeNamespace = ""
+            custom string inputs:qosProfile
+            custom uint64 inputs:queueSize
+            custom token inputs:renderProductPath
+            prepend token inputs:renderProductPath.connect = </Graph/ROS_LidarRTX/RenderProduct.outputs:renderProductPath>
+            custom bool inputs:resetSimulationTimeOnStop
+            custom bool inputs:showDebugView
+            custom string inputs:topicName = "/robosense_airy"
+            custom token inputs:type = "point_cloud" (
+                allowedTokens = ["laser_scan", "point_cloud"]
+            )
+            custom bool inputs:useSystemTime
+            token node:type = "isaacsim.ros2.bridge.ROS2RtxLidarHelper"
+            int node:typeVersion = 1
+            uniform float2 ui:nodegraph:node:pos = (-113.647736, -1.2996457)
+        }
     }
 }
 
