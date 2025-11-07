@@ -2,6 +2,7 @@
 
 import rclpy
 from rclpy.node import Node
+from rclpy.qos import QoSProfile, ReliabilityPolicy, HistoryPolicy
 from std_msgs.msg import String as StringMsg
 import json
 import time
@@ -12,8 +13,13 @@ class TeleopManualTester(Node):
     def __init__(self):
         super().__init__('teleop_manual_tester')
         
-        # Create publisher for teleop control
-        self.teleop_pub = self.create_publisher(StringMsg, '/controls/teleop', 10)
+        # Create publisher for teleop control (match subscriber QoS: BEST_EFFORT)
+        teleop_qos = QoSProfile(
+            reliability=ReliabilityPolicy.BEST_EFFORT,
+            history=HistoryPolicy.KEEP_LAST,
+            depth=10
+        )
+        self.teleop_pub = self.create_publisher(StringMsg, '/controls/teleop', teleop_qos)
         
         self.get_logger().info('Teleop Manual Tester started')
         self.get_logger().info('Publishing commands to /controls/teleop')
@@ -31,15 +37,10 @@ def print_menu():
     print('\n' + '='*60)
     print('Teleop Manual Control Tester')
     print('='*60)
-    print('1. Test bucket control')
-    print('2. Test stick/arm control')
-    print('3. Test boom control')
-    print('4. Test swing/body rotation control')
-    print('5. Test combined control (bucket + boom)')
-    print('6. Test combined control (stick + swing)')
-    print('7. Send custom values')
-    print('8. Reset all to zero')
-    print('9. Run continuous oscillation test')
+    print('Hint: per-axis steps assumed in receiver:')
+    print('  bucket=0.03 m/tick, arm=0.02 m/tick, boom=0.02 m/tick, yaw=0.04 rad/tick')
+    print('1. Run automatic digging cycle')
+    print('2. Run continuous all-actuators motion')
     print('0. Exit')
     print('='*60)
 
@@ -72,125 +73,10 @@ def main(args=None):
                 print('Exiting...')
                 break
                 
-            elif choice == '1':
-                # Test bucket
-                value = get_float_input('Enter bucket value [-1.0 to 1.0] (default 0.5): ', 0.5)
-                value = max(-1.0, min(1.0, value))
-                node.publish_control({
-                    'bucket': value,
-                    'stick': 0.0,
-                    'boom': 0.0,
-                    'swing': 0.0,
-                    'device_type': 'excavator',
-                    'timestamp': int(time.time() * 1000)
-                })
-                
             elif choice == '2':
-                # Test stick
-                value = get_float_input('Enter stick value [-1.0 to 1.0] (default 0.5): ', 0.5)
-                value = max(-1.0, min(1.0, value))
-                node.publish_control({
-                    'bucket': 0.0,
-                    'stick': value,
-                    'boom': 0.0,
-                    'swing': 0.0,
-                    'device_type': 'excavator',
-                    'timestamp': int(time.time() * 1000)
-                })
-                
-            elif choice == '3':
-                # Test boom
-                value = get_float_input('Enter boom value [-1.0 to 1.0] (default 0.5): ', 0.5)
-                value = max(-1.0, min(1.0, value))
-                node.publish_control({
-                    'bucket': 0.0,
-                    'stick': 0.0,
-                    'boom': value,
-                    'swing': 0.0,
-                    'device_type': 'excavator',
-                    'timestamp': int(time.time() * 1000)
-                })
-                
-            elif choice == '4':
-                # Test swing
-                value = get_float_input('Enter swing value [-1.0 to 1.0] (default 0.5): ', 0.5)
-                value = max(-1.0, min(1.0, value))
-                node.publish_control({
-                    'bucket': 0.0,
-                    'stick': 0.0,
-                    'boom': 0.0,
-                    'swing': value,
-                    'device_type': 'excavator',
-                    'timestamp': int(time.time() * 1000)
-                })
-                
-            elif choice == '5':
-                # Combined bucket + boom
-                bucket = get_float_input('Enter bucket value [-1.0 to 1.0] (default 0.5): ', 0.5)
-                boom = get_float_input('Enter boom value [-1.0 to 1.0] (default 0.5): ', 0.5)
-                bucket = max(-1.0, min(1.0, bucket))
-                boom = max(-1.0, min(1.0, boom))
-                node.publish_control({
-                    'bucket': bucket,
-                    'stick': 0.0,
-                    'boom': boom,
-                    'swing': 0.0,
-                    'device_type': 'excavator',
-                    'timestamp': int(time.time() * 1000)
-                })
-                
-            elif choice == '6':
-                # Combined stick + swing
-                stick = get_float_input('Enter stick value [-1.0 to 1.0] (default 0.5): ', 0.5)
-                swing = get_float_input('Enter swing value [-1.0 to 1.0] (default 0.5): ', 0.5)
-                stick = max(-1.0, min(1.0, stick))
-                swing = max(-1.0, min(1.0, swing))
-                node.publish_control({
-                    'bucket': 0.0,
-                    'stick': stick,
-                    'boom': 0.0,
-                    'swing': swing,
-                    'device_type': 'excavator',
-                    'timestamp': int(time.time() * 1000)
-                })
-                
-            elif choice == '7':
-                # Custom values
-                print('\nEnter custom values for all controls:')
-                bucket = get_float_input('  Bucket [-1.0 to 1.0]: ', 0.0)
-                stick = get_float_input('  Stick [-1.0 to 1.0]: ', 0.0)
-                boom = get_float_input('  Boom [-1.0 to 1.0]: ', 0.0)
-                swing = get_float_input('  Swing [-1.0 to 1.0]: ', 0.0)
-                
-                bucket = max(-1.0, min(1.0, bucket))
-                stick = max(-1.0, min(1.0, stick))
-                boom = max(-1.0, min(1.0, boom))
-                swing = max(-1.0, min(1.0, swing))
-                
-                node.publish_control({
-                    'bucket': bucket,
-                    'stick': stick,
-                    'boom': boom,
-                    'swing': swing,
-                    'device_type': 'excavator',
-                    'timestamp': int(time.time() * 1000)
-                })
-                
-            elif choice == '8':
-                # Reset to zero
-                print('Resetting all controls to zero...')
-                node.publish_control({
-                    'bucket': 0.0,
-                    'stick': 0.0,
-                    'boom': 0.0,
-                    'swing': 0.0,
-                    'device_type': 'excavator',
-                    'timestamp': int(time.time() * 1000)
-                })
-                
-            elif choice == '9':
                 # Continuous oscillation test
                 print('\nRunning continuous oscillation test...')
+                print('Using per-axis steps: bucket=0.03, arm=0.02, boom=0.02, yaw=0.04')
                 print('Press Ctrl+C to stop')
                 try:
                     import math
@@ -222,6 +108,54 @@ def main(args=None):
                         'device_type': 'excavator',
                         'timestamp': int(time.time() * 1000)
                     })
+            elif choice == '1':
+                # Automatic digging cycle
+                print('\nRunning automatic digging cycle...')
+                print('This will perform: approach -> dig -> lift -> swing -> dump -> return')
+                print('Using per-axis steps: bucket=0.03, arm=0.02, boom=0.02, yaw=0.04')
+                
+                def hold_control(bucket, stick, boom, swing, duration_s):
+                    end_time = time.time() + duration_s
+                    while time.time() < end_time:
+                        node.publish_control({
+                            'bucket': bucket,
+                            'stick': stick,
+                            'boom': boom,
+                            'swing': swing,
+                            'device_type': 'excavator',
+                            'timestamp': int(time.time() * 1000)
+                        })
+                        time.sleep(0.1)
+                
+                try:
+                    # 0) 安全起始：停止
+                    hold_control(0.0, 0.0, 0.0, 0.0, 0.5)
+
+                    # 1) 靠近料堆：放大臂、伸小臂、开斗（更大幅度，延长时间）
+                    hold_control(bucket=-1.0, stick=+1.0, boom=-1.0, swing=0.0, duration_s=4.0)
+
+                    # 2) 切入并铲装：强力收斗、继续下压，微收小臂
+                    hold_control(bucket=+1.0, stick=-0.5, boom=-0.8, swing=0.0, duration_s=2.5)
+
+                    # 3) 提升铲斗：大幅抬大臂、强力收小臂
+                    hold_control(bucket=+1.0, stick=-1.0, boom=+1.0, swing=0.0, duration_s=3.0)
+
+                    # 4) 回转到卸料位：保持抬臂，快速回转
+                    # 注意 teleop 节点对 swing 有符号翻转
+                    hold_control(bucket=+0.9, stick=-0.4, boom=+0.9, swing=+0.9, duration_s=3.0)
+
+                    # 5) 倾倒：完全打开铲斗
+                    hold_control(bucket=-1.0, stick=0.0, boom=+0.6, swing=0.0, duration_s=1.8)
+
+                    # 6) 回到作业位：回转回去，放臂，斗回中
+                    hold_control(bucket=0.0, stick=+0.4, boom=-0.9, swing=-0.9, duration_s=3.0)
+
+                    # 7) 稳定
+                    hold_control(0.0, 0.0, 0.0, 0.0, 0.8)
+
+                    print('Automatic digging cycle finished.')
+                except KeyboardInterrupt:
+                    print('\nAutomatic cycle interrupted')
                 
             else:
                 print('Invalid choice, please try again.')

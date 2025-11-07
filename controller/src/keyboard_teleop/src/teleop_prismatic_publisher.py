@@ -64,9 +64,12 @@ class TeleopPrismaticPublisher(Node):
         # Flag to track if we've received first control command
         self.initialized = False
 
-        # Step sizes per timer tick (0.1s): tune as needed
-        self.step_linear = 0.01  # meters per tick (reduced for less sensitive control)
-        self.step_yaw = 0.02     # radians per tick (reduced for less sensitive control)
+        # Step sizes per timer tick (0.1s): tune as needed (per-axis)
+        self.step_linear = 0.01            # default linear step (fallback)
+        self.step_bucket_linear = 0.03     # meters/tick for bucket
+        self.step_arm_linear = 0.02        # meters/tick for arm (stick)
+        self.step_boom_linear = 0.02       # meters/tick for boom
+        self.step_body_yaw = 0.04          # radians/tick for body rotation
 
         # Limits (symmetric for simplicity)
         self.lin_limit = 1.0    # meters (for bucket and arm)
@@ -160,6 +163,10 @@ class TeleopPrismaticPublisher(Node):
                         changed_flag = True
                         # self.get_logger().info(f'[DEBUG] Detected change in {k}: {prev_v} -> {new_v}')
                         break
+
+            # Ensure first command always triggers initialization and processing
+            if not self.initialized:
+                changed_flag = True
             
             # If relevant inputs changed, update states immediately
             if changed_flag:
@@ -220,19 +227,19 @@ class TeleopPrismaticPublisher(Node):
         # Map bucket (-1..1) to bucket prismatic position
         # Positive input -> extend bucket (positive position)
         bucket = float(self.latest_controls['bucket'])
-        delta_bucket = bucket * self.step_linear
+        delta_bucket = bucket * self.step_bucket_linear
         self.bucket_pos = max(-self.lin_limit, min(self.lin_limit, self.bucket_pos + delta_bucket))
 
         # Map stick (-1..1) to arm prismatic position
         # Positive input -> extend arm (positive position)
         stick = float(self.latest_controls['stick'])
-        delta_arm = stick * self.step_linear
+        delta_arm = stick * self.step_arm_linear
         self.arm_pos = max(-self.lin_limit, min(self.lin_limit, self.arm_pos + delta_arm))
 
         # Map boom (-1..1) to boom prismatic position
         # Positive input -> extend boom (positive position)
         boom = float(self.latest_controls['boom'])
-        delta_boom = boom * self.step_linear
+        delta_boom = boom * self.step_boom_linear
         self.boom_pos = max(-self.boom_limit, min(self.boom_limit, self.boom_pos + delta_boom))
 
         # Map swing or rotation (-1..1) to body yaw
@@ -241,7 +248,7 @@ class TeleopPrismaticPublisher(Node):
         rotation = float(self.latest_controls.get('rotation', 0.0))
         # Use swing if available, otherwise use rotation
         body_input = swing if abs(swing) > self.output_epsilon else rotation
-        delta_yaw = body_input * self.step_yaw
+        delta_yaw = body_input * self.step_body_yaw
         self.body_yaw = max(-self.yaw_limit, min(self.yaw_limit, self.body_yaw + delta_yaw))
 
         # Only output when values change beyond epsilon
