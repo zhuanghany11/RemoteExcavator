@@ -2,6 +2,7 @@
 
 import rclpy
 from rclpy.node import Node
+from rclpy.qos import QoSProfile, ReliabilityPolicy, HistoryPolicy
 from sensor_msgs.msg import JointState
 from std_msgs.msg import String as StringMsg
 import math
@@ -30,26 +31,46 @@ class TeleopPrismaticPublisher(Node):
         # Publisher
         self.joint_pub = self.create_publisher(JointState, topic, 10)
 
+        # QoS profile for teleop subscription (compatible with most publishers)
+        teleop_qos = QoSProfile(
+            reliability=ReliabilityPolicy.BEST_EFFORT,  # 兼容 BEST_EFFORT 发布者
+            history=HistoryPolicy.KEEP_LAST,
+            depth=10
+        )
+
         # Subscribe to teleop control topic (JSON in std_msgs/String)
         self.teleop_sub = self.create_subscription(
             StringMsg,
             '/controls/teleop',
             self.teleop_callback,
+            teleop_qos
+        )
+        
+        # Subscribe to joint states to get current positions on startup
+        self.joint_state_sub = self.create_subscription(
+            JointState,
+            '/joint_states',
+            self.joint_state_callback,
             10
         )
 
         # State (3 prismatic in meters, 1 revolute in radians)
-        self.bucket_pos = 0.0
-        self.arm_pos = 0.0
-        self.boom_pos = 0.0
-        self.body_yaw = 0.0
+        # Initialize to None to avoid resetting to zero on startup
+        self.bucket_pos = None
+        self.arm_pos = None
+        self.boom_pos = None
+        self.body_yaw = None
+        
+        # Flag to track if we've received first control command
+        self.initialized = False
 
         # Step sizes per timer tick (0.1s): tune as needed
-        self.step_linear = 0.05  # meters per tick
-        self.step_yaw = 0.1      # radians per tick
+        self.step_linear = 0.01  # meters per tick (reduced for less sensitive control)
+        self.step_yaw = 0.02     # radians per tick (reduced for less sensitive control)
 
         # Limits (symmetric for simplicity)
-        self.lin_limit = 0.5    # meters
+        self.lin_limit = 1.0    # meters (for bucket and arm)
+        self.boom_limit = 1.0   # meters (larger range for boom)
         self.yaw_limit = math.pi # radians
 
         # Latest controls received from teleop topic (defaults per spec)
@@ -89,8 +110,11 @@ class TeleopPrismaticPublisher(Node):
         self.get_logger().info('Listening to /controls/teleop for control commands')
 
     def teleop_callback(self, msg: StringMsg):
+        # 添加调试信息：确认收到消息
+        # self.get_logger().info(f'[DEBUG] Received teleop message: {msg.data[:100]}...')
         try:
             data = json.loads(msg.data)
+            # self.get_logger().info(f'[DEBUG] Parsed JSON successfully. Keys: {list(data.keys())}')
             # Update only known keys; clamp to valid ranges
             def clamp(val, min_v, max_v):
                 return max(min_v, min(max_v, val))
@@ -134,17 +158,65 @@ class TeleopPrismaticPublisher(Node):
                     new_v = self.latest_controls.get(k)
                     if prev_v is None or abs(float(prev_v) - float(new_v)) > self.output_epsilon:
                         changed_flag = True
+                        # self.get_logger().info(f'[DEBUG] Detected change in {k}: {prev_v} -> {new_v}')
                         break
             
             # If relevant inputs changed, update states immediately
             if changed_flag:
+                # self.get_logger().info('[DEBUG] Processing changed controls...')
                 self.update_positions()
                 self.publish_joint_state()
+            # else:
+            #     self.get_logger().info('[DEBUG] No significant changes detected')
                 
         except Exception as e:
             self.get_logger().warn(f'Failed to parse /controls/teleop JSON: {e}')
 
+    def joint_state_callback(self, msg: JointState):
+        # Sync current positions from joint states on first message only
+        if not self.initialized:
+            try:
+                # Find indices of our joints in the joint state message
+                for i, joint_name in enumerate(msg.name):
+                    if joint_name == 'bucket_linear':
+                        self.bucket_pos = -msg.position[i]  # Inverted to match our convention
+                    elif joint_name == 'arm_linear':
+                        self.arm_pos = -msg.position[i]  # Inverted to match our convention
+                    elif joint_name == 'boom_linear':
+                        self.boom_pos = -msg.position[i]  # Inverted to match our convention
+                    elif joint_name == 'body_rotate':
+                        self.body_yaw = msg.position[i]
+                
+                # If we got at least one position, mark as initialized
+                if self.bucket_pos is not None or self.arm_pos is not None or \
+                   self.boom_pos is not None or self.body_yaw is not None:
+                    # Set any None values to 0.0
+                    if self.bucket_pos is None:
+                        self.bucket_pos = 0.0
+                    if self.arm_pos is None:
+                        self.arm_pos = 0.0
+                    if self.boom_pos is None:
+                        self.boom_pos = 0.0
+                    if self.body_yaw is None:
+                        self.body_yaw = 0.0
+                    self.initialized = True
+                    self.get_logger().info(
+                        f'Synced current positions: bucket={self.bucket_pos:.3f}, '
+                        f'arm={self.arm_pos:.3f}, boom={self.boom_pos:.3f}, '
+                        f'body_yaw={self.body_yaw:.3f}'
+                    )
+            except Exception as e:
+                self.get_logger().warn(f'Failed to sync joint states: {e}')
+
     def update_positions(self):
+        # Initialize positions to 0.0 on first call (not on startup)
+        if not self.initialized:
+            self.bucket_pos = 0.0
+            self.arm_pos = 0.0
+            self.boom_pos = 0.0
+            self.body_yaw = 0.0
+            self.initialized = True
+        
         # Map bucket (-1..1) to bucket prismatic position
         # Positive input -> extend bucket (positive position)
         bucket = float(self.latest_controls['bucket'])
@@ -161,11 +233,11 @@ class TeleopPrismaticPublisher(Node):
         # Positive input -> extend boom (positive position)
         boom = float(self.latest_controls['boom'])
         delta_boom = boom * self.step_linear
-        self.boom_pos = max(-self.lin_limit, min(self.lin_limit, self.boom_pos + delta_boom))
+        self.boom_pos = max(-self.boom_limit, min(self.boom_limit, self.boom_pos + delta_boom))
 
         # Map swing or rotation (-1..1) to body yaw
         # Prefer swing, fallback to rotation
-        swing = float(self.latest_controls.get('swing', 0.0))
+        swing = - float(self.latest_controls.get('swing', 0.0))
         rotation = float(self.latest_controls.get('rotation', 0.0))
         # Use swing if available, otherwise use rotation
         body_input = swing if abs(swing) > self.output_epsilon else rotation
@@ -194,10 +266,12 @@ class TeleopPrismaticPublisher(Node):
             self.prev_values['body_yaw'] = self.body_yaw
 
     def timer_callback(self):
-        # Update positions based on latest controls (for continuous movement)
-        self.update_positions()
-        # Publish joint state
-        self.publish_joint_state()
+        # Only update and publish after receiving first control command
+        if self.initialized:
+            # Update positions based on latest controls (for continuous movement)
+            self.update_positions()
+            # Publish joint state
+            self.publish_joint_state()
 
     def publish_joint_state(self):
         msg = JointState()
