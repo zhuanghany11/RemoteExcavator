@@ -27,6 +27,10 @@ install(
   PROGRAMS
     src/keyboard_joint_publisher.py
     src/keyboard_prismatic_publisher.py
+    src/keyboard_piston_joint_publisher_2.py
+    src/teleop_prismatic_publisher.py
+    src/test_teleop_control.py
+    src/test_teleop_manual.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
