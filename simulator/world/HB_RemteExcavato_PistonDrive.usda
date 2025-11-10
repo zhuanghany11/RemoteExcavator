@@ -7,8 +7,8 @@
                 double radius = 193.994580078125
             }
             dictionary Perspective = {
-                double3 position = (24.34479640123312, -2.34575467074803, 14.14749837160542)
-                double3 target = (10.971549044751297, -7.990633110181258, 2.2887170246525237)
+                double3 position = (19.996407435368354, -8.220326706992994, 9.515985569754951)
+                double3 target = (13.115514611866512, -10.974691388107212, 1.3151997135068427)
             }
             dictionary Right = {
                 double3 position = (9.102229805280327, -50011.284248769734, 3.612152776691489)
@@ -18,7 +18,7 @@
                 double3 position = (11.43970809437414, -8.271897377741686, 5)
                 double radius = 11.566949462890625
             }
-            string boundCamera = "/World/PC2000_full/excavator/main_body/main_body/front_surround_camera"
+            string boundCamera = "/OmniverseKit_Persp"
         }
         dictionary metricsAssembler = {
             dictionary "/World/Shacman_F3000_Dump_Truck" = {
@@ -118,7 +118,7 @@ def "Render" (
                 no_delete = true
             )
             {
-                rel camera = </World/PC2000_full/excavator/main_body/main_body/front_surround_camera>
+                rel camera = </OmniverseKit_Persp>
                 token omni:rtx:background:source:texture:textureMode = "repeatMirrored"
                 token omni:rtx:background:source:type = "domeLight"
                 bool omni:rtx:dlss:frameGeneration = 0
@@ -3069,7 +3069,7 @@ def "World"
                 {
                     quatf xformOp:orient = (1, 0, 0, 0)
                     float3 xformOp:scale = (1, 1, 1)
-                    double3 xformOp:translate = (0, 0, 0.9999999999999998)
+                    double3 xformOp:translate = (0, 0, 0)
                     uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
 
                     def Camera "front_camera"
