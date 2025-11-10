@@ -8,7 +8,7 @@
             }
             dictionary Perspective = {
                 double3 position = (29.80797097590461, -7.825970831525792, 5.448501817309895)
-                double3 target = (12.784272913930145, -10.006739338262781, 0.2073661541659586)
+                double3 target = (12.784272913930149, -10.006739338262804, 0.20736615416595683)
             }
             dictionary Right = {
                 double3 position = (9.102229805280327, -50011.284248769734, 3.612152776691489)
@@ -3495,8 +3495,8 @@ def "World"
                     prepend apiSchemas = ["PhysicsDriveAPI:angular"]
                 )
                 {
-                    float drive:angular:physics:damping = 0
-                    float drive:angular:physics:stiffness = 0
+                    float drive:angular:physics:damping = 1000
+                    float drive:angular:physics:stiffness = 100
                     float drive:angular:physics:targetVelocity = 0
                     uniform token physics:axis = "X"
                     rel physics:body0 = </World/PC2000_full/excavator/undercarriage>
@@ -3554,7 +3554,7 @@ def "World"
                 {
                     float drive:angular:physics:damping = 1000
                     float drive:angular:physics:stiffness = 100
-                    float drive:angular:physics:targetVelocity = -500
+                    float drive:angular:physics:targetVelocity = 0
                     uniform token physics:axis = "X"
                     rel physics:body0 = </World/PC2000_full/excavator/undercarriage>
                     rel physics:body1 = </World/PC2000_full/excavator/back_right>
@@ -3609,7 +3609,7 @@ def "World"
                 {
                     float drive:angular:physics:damping = 1000
                     float drive:angular:physics:stiffness = 100
-                    float drive:angular:physics:targetVelocity = -500
+                    float drive:angular:physics:targetVelocity = 0
                     uniform token physics:axis = "X"
                     rel physics:body0 = </World/PC2000_full/excavator/undercarriage>
                     rel physics:body1 = </World/PC2000_full/excavator/front_left>
@@ -3664,7 +3664,7 @@ def "World"
                 {
                     float drive:angular:physics:damping = 1000
                     float drive:angular:physics:stiffness = 100
-                    float drive:angular:physics:targetVelocity = -500
+                    float drive:angular:physics:targetVelocity = 0
                     uniform token physics:axis = "X"
                     rel physics:body0 = </World/PC2000_full/excavator/undercarriage>
                     rel physics:body1 = </World/PC2000_full/excavator/back_left>
