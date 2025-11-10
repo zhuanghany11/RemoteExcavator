@@ -19,13 +19,19 @@ class TeleopPrismaticPublisher(Node):
         self.declare_parameter('joint_arm', 'arm_linear')
         self.declare_parameter('joint_boom', 'boom_linear')
         self.declare_parameter('joint_body_rotate', 'body_rotate')
+        # Track velocity scale parameter (for differential tracks)
+        self.declare_parameter('track_velocity_scale', 10.0)
 
         topic = self.get_parameter('topic').get_parameter_value().string_value
         self.joint_names = [
             'bucket_linear',
             'arm_linear',
             'boom_linear',
-            'body_rotate'
+            'body_rotate',
+            'front_left_wheel_angle',
+            'back_left_wheel_angle',
+            'front_right_wheel_angle',
+            'back_right_wheel_angle',
         ]
 
         # Publisher
@@ -61,6 +67,10 @@ class TeleopPrismaticPublisher(Node):
         self.boom_pos = None
         self.body_yaw = None
         
+        # Track velocities (for differential track model)
+        self.left_track_velocity = 0.0
+        self.right_track_velocity = 0.0
+        
         # Flag to track if we've received first control command
         self.initialized = False
 
@@ -70,6 +80,10 @@ class TeleopPrismaticPublisher(Node):
         self.step_arm_linear = 0.02        # meters/tick for arm (stick)
         self.step_boom_linear = 0.02       # meters/tick for boom
         self.step_body_yaw = 0.04          # radians/tick for body rotation
+        
+        # Track velocity mapping (direct mapping to wheel angular velocity)
+        # Default conservative value to avoid instability; configurable via ROS parameter
+        self.track_velocity_scale = float(self.get_parameter('track_velocity_scale').get_parameter_value().double_value)
 
         # Limits (symmetric for simplicity)
         self.lin_limit = 1.0    # meters (for bucket and arm)
@@ -101,6 +115,8 @@ class TeleopPrismaticPublisher(Node):
             'arm_pos': None,
             'boom_pos': None,
             'body_yaw': None,
+            'left_track_velocity': None,
+            'right_track_velocity': None,
         }
 
         # Publish timer (for continuous updates even without new teleop messages)
@@ -123,7 +139,7 @@ class TeleopPrismaticPublisher(Node):
                 return max(min_v, min(max_v, val))
             
             # Track changes only for specified keys
-            watched_keys = ['bucket', 'stick', 'boom', 'swing', 'rotation']
+            watched_keys = ['bucket', 'stick', 'boom', 'swing', 'rotation', 'left_track', 'right_track']
             changed_flag = False
             
             # Snapshot before
@@ -250,6 +266,15 @@ class TeleopPrismaticPublisher(Node):
         body_input = swing if abs(swing) > self.output_epsilon else rotation
         delta_yaw = body_input * self.step_body_yaw
         self.body_yaw = max(-self.yaw_limit, min(self.yaw_limit, self.body_yaw + delta_yaw))
+        
+        # Map left_track and right_track (-1..1) to track velocities (differential drive model)
+        # Direct mapping to wheel angular velocities (rad/s or sim units)
+        left_track = float(self.latest_controls.get('left_track', 0.0))
+        right_track = float(self.latest_controls.get('right_track', 0.0))
+        
+        # Sign convention: forward ≈ -500, backward ≈ +500
+        self.left_track_velocity = -left_track * self.track_velocity_scale
+        self.right_track_velocity = -right_track * self.track_velocity_scale
 
         # Only output when values change beyond epsilon
         def changed(a, b):
@@ -261,16 +286,21 @@ class TeleopPrismaticPublisher(Node):
             changed(self.prev_values['bucket_pos'], self.bucket_pos) or
             changed(self.prev_values['arm_pos'], self.arm_pos) or
             changed(self.prev_values['boom_pos'], self.boom_pos) or
-            changed(self.prev_values['body_yaw'], self.body_yaw)
+            changed(self.prev_values['body_yaw'], self.body_yaw) or
+            changed(self.prev_values['left_track_velocity'], self.left_track_velocity) or
+            changed(self.prev_values['right_track_velocity'], self.right_track_velocity)
         ):
             self.get_logger().info(
                 f"bucket: {self.bucket_pos:.3f}, arm: {self.arm_pos:.3f}, "
-                f"boom: {self.boom_pos:.3f}, body_yaw: {self.body_yaw:.3f} ({math.degrees(self.body_yaw):.1f}°)"
+                f"boom: {self.boom_pos:.3f}, body_yaw: {self.body_yaw:.3f} ({math.degrees(self.body_yaw):.1f}°), "
+                f"tracks: L={self.left_track_velocity:.2f} R={self.right_track_velocity:.2f}"
             )
             self.prev_values['bucket_pos'] = self.bucket_pos
             self.prev_values['arm_pos'] = self.arm_pos
             self.prev_values['boom_pos'] = self.boom_pos
             self.prev_values['body_yaw'] = self.body_yaw
+            self.prev_values['left_track_velocity'] = self.left_track_velocity
+            self.prev_values['right_track_velocity'] = self.right_track_velocity
 
     def timer_callback(self):
         # Only update and publish after receiving first control command
@@ -289,8 +319,21 @@ class TeleopPrismaticPublisher(Node):
             -self.arm_pos,     # Inverted like in keyboard_prismatic_publisher
             -self.boom_pos,    # Inverted like in keyboard_prismatic_publisher
             self.body_yaw,
+            float('nan'),      # front_left_wheel_angle (velocity control)
+            float('nan'),      # back_left_wheel_angle (velocity control)
+            float('nan'),      # front_right_wheel_angle (velocity control)
+            float('nan'),      # back_right_wheel_angle (velocity control)
         ]
-        msg.velocity = [0.0] * len(self.joint_names)
+        msg.velocity = [
+            0.0,                        # bucket_linear
+            0.0,                        # arm_linear
+            0.0,                        # boom_linear
+            0.0,                        # body_rotate
+            self.left_track_velocity,   # front_left_wheel_angle
+            self.left_track_velocity,   # back_left_wheel_angle
+            self.right_track_velocity,  # front_right_wheel_angle
+            self.right_track_velocity,  # back_right_wheel_angle
+        ]
         msg.effort = [0.0] * len(self.joint_names)
 
         self.joint_pub.publish(msg)

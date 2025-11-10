@@ -41,6 +41,7 @@ def print_menu():
     print('  bucket=0.03 m/tick, arm=0.02 m/tick, boom=0.02 m/tick, yaw=0.04 rad/tick')
     print('1. Run automatic digging cycle')
     print('2. Run continuous all-actuators motion')
+    print('3. Run track mapping test (forward/back/turn sequence)')
     print('0. Exit')
     print('='*60)
 
@@ -87,12 +88,17 @@ def main(args=None):
                         stick = 0.5 * math.cos(elapsed * 1.2)
                         boom = 0.5 * math.sin(elapsed * 0.8)
                         swing = 0.3 * math.cos(elapsed * 0.5)
+                        # Tracks: alternate left/right turn
+                        left_track = 0.5 * math.sin(elapsed * 0.6)
+                        right_track = -0.5 * math.sin(elapsed * 0.6)
                         
                         node.publish_control({
                             'bucket': bucket,
                             'stick': stick,
                             'boom': boom,
                             'swing': swing,
+                            'left_track': left_track,
+                            'right_track': right_track,
                             'device_type': 'excavator',
                             'timestamp': int(time.time() * 1000)
                         })
@@ -105,6 +111,8 @@ def main(args=None):
                         'stick': 0.0,
                         'boom': 0.0,
                         'swing': 0.0,
+                        'left_track': 0.0,
+                        'right_track': 0.0,
                         'device_type': 'excavator',
                         'timestamp': int(time.time() * 1000)
                     })
@@ -156,6 +164,52 @@ def main(args=None):
                     print('Automatic digging cycle finished.')
                 except KeyboardInterrupt:
                     print('\nAutomatic cycle interrupted')
+			
+            elif choice == '3':
+                # Track mapping test: forward -> stop -> back -> stop -> left pivot -> right pivot -> gentle curves
+                print('\nRunning track mapping test (forward/back/turn sequence)...')
+                def hold_tracks(left, right, duration_s):
+                    end_time = time.time() + duration_s
+                    while time.time() < end_time:
+                        node.publish_control({
+                            'bucket': 0.0,
+                            'stick': 0.0,
+                            'boom': 0.0,
+                            'swing': 0.0,
+                            'left_track': left,
+                            'right_track': right,
+                            'device_type': 'excavator',
+                            'timestamp': int(time.time() * 1000)
+                        })
+                        time.sleep(0.1)
+                try:
+                    # forward
+                    print(' - Forward')
+                    hold_tracks(+0.8, +0.8, 3.0)
+                    # stop
+                    hold_tracks(0.0, 0.0, 1.0)
+                    # backward
+                    print(' - Backward')
+                    hold_tracks(-0.8, -0.8, 3.0)
+                    # stop
+                    hold_tracks(0.0, 0.0, 1.0)
+                    # left pivot (on spot)
+                    print(' - Left pivot')
+                    hold_tracks(-0.8, +0.8, 2.5)
+                    # right pivot (on spot)
+                    print(' - Right pivot')
+                    hold_tracks(+0.8, -0.8, 2.5)
+                    # gentle left curve
+                    print(' - Gentle left curve')
+                    hold_tracks(+0.6, +0.2, 3.0)
+                    # gentle right curve
+                    print(' - Gentle right curve')
+                    hold_tracks(+0.2, +0.6, 3.0)
+                    # stop
+                    hold_tracks(0.0, 0.0, 1.0)
+                    print('Track mapping test finished.')
+                except KeyboardInterrupt:
+                    print('\nTrack mapping test interrupted')
                 
             else:
                 print('Invalid choice, please try again.')
