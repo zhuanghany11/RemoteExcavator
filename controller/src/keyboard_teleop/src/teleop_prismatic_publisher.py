@@ -61,18 +61,18 @@ class TeleopPrismaticPublisher(Node):
         )
 
         # State (3 prismatic in meters, 1 revolute in radians)
-        # Initialize to None to avoid resetting to zero on startup
-        self.bucket_pos = None
-        self.arm_pos = None
-        self.boom_pos = None
-        self.body_yaw = None
+        # Initialize to middle position (0.0) on startup
+        self.bucket_pos = 0.0
+        self.arm_pos = 0.0
+        self.boom_pos = 0.0
+        self.body_yaw = 0.0
         
         # Track velocities (for differential track model)
         self.left_track_velocity = 0.0
         self.right_track_velocity = 0.0
         
         # Flag to track if we've received first control command
-        self.initialized = False
+        self.initialized = True  # Set to True so we can publish initial positions immediately
 
         # Step sizes per timer tick (0.1s): tune as needed (per-axis)
         self.step_linear = 0.01            # default linear step (fallback)
@@ -119,14 +119,31 @@ class TeleopPrismaticPublisher(Node):
             'right_track_velocity': None,
         }
 
+        # Log throttling: only log every N seconds to avoid excessive output
+        self.last_log_time = 0.0
+        self.log_interval = 1.0  # Log at most once per second
+
         # Publish timer (for continuous updates even without new teleop messages)
-        self.create_timer(0.1, self.timer_callback)
+        # Reduced frequency to 20Hz (0.05s) to reduce CPU load
+        self.create_timer(0.05, self.timer_callback)
 
         # Logs
         self.get_logger().info('Teleop Prismatic Publisher started')
         self.get_logger().info('Topic: %s' % topic)
         self.get_logger().info('Joint order: %s' % ', '.join(self.joint_names))
         self.get_logger().info('Listening to /controls/teleop for control commands')
+        self.get_logger().info('Initializing bucket, arm, and boom to middle position (0.0)')
+        
+        # Publish initial middle positions after a short delay to ensure subscribers are ready
+        self.initial_publish_done = False
+        self.create_timer(0.5, self.publish_initial_positions)
+
+    def publish_initial_positions(self):
+        """Publish initial middle positions once on startup"""
+        if not self.initial_publish_done:
+            self.publish_joint_state()
+            self.initial_publish_done = True
+            self.get_logger().info('Published initial middle positions for bucket, arm, and boom')
 
     def teleop_callback(self, msg: StringMsg):
         # 添加调试信息：确认收到消息
@@ -196,7 +213,9 @@ class TeleopPrismaticPublisher(Node):
             self.get_logger().warn(f'Failed to parse /controls/teleop JSON: {e}')
 
     def joint_state_callback(self, msg: JointState):
-        # Sync current positions from joint states on first message only
+        # Note: Positions are now initialized to middle position (0.0) on startup
+        # This callback is kept for potential future use but currently does not sync positions
+        # Sync current positions from joint states on first message only (disabled)
         if not self.initialized:
             try:
                 # Find indices of our joints in the joint state message
@@ -232,14 +251,7 @@ class TeleopPrismaticPublisher(Node):
                 self.get_logger().warn(f'Failed to sync joint states: {e}')
 
     def update_positions(self):
-        # Initialize positions to 0.0 on first call (not on startup)
-        if not self.initialized:
-            self.bucket_pos = 0.0
-            self.arm_pos = 0.0
-            self.boom_pos = 0.0
-            self.body_yaw = 0.0
-            self.initialized = True
-        
+        # Positions are already initialized to middle position (0.0) in __init__
         # Map bucket (-1..1) to bucket prismatic position
         # Positive input -> extend bucket (positive position)
         bucket = float(self.latest_controls['bucket'])
@@ -272,9 +284,31 @@ class TeleopPrismaticPublisher(Node):
         left_track = float(self.latest_controls.get('left_track', 0.0))
         right_track = float(self.latest_controls.get('right_track', 0.0))
         
+        # Dead zone: -0.5 to 0.5 range produces no movement
+        # Apply dead zone by clamping values outside the dead zone
+        track_dead_zone = 0.5
+        if abs(left_track) <= track_dead_zone:
+            left_track = 0.0
+        else:
+            # Scale the remaining range (-1 to -0.5 and 0.5 to 1) to full range
+            if left_track > 0:
+                left_track = (left_track - track_dead_zone) / (1.0 - track_dead_zone)
+            else:
+                left_track = (left_track + track_dead_zone) / (1.0 - track_dead_zone)
+        
+        if abs(right_track) <= track_dead_zone:
+            right_track = 0.0
+        else:
+            # Scale the remaining range (-1 to -0.5 and 0.5 to 1) to full range
+            if right_track > 0:
+                right_track = (right_track - track_dead_zone) / (1.0 - track_dead_zone)
+            else:
+                right_track = (right_track + track_dead_zone) / (1.0 - track_dead_zone)
+        
         # Sign convention: forward ≈ -500, backward ≈ +500
-        self.left_track_velocity = -left_track * self.track_velocity_scale
-        self.right_track_velocity = -right_track * self.track_velocity_scale
+        # Note: direction corrected - positive input now maps to forward (negative velocity)
+        self.left_track_velocity = left_track * self.track_velocity_scale
+        self.right_track_velocity = right_track * self.track_velocity_scale
 
         # Only output when values change beyond epsilon
         def changed(a, b):
@@ -282,19 +316,27 @@ class TeleopPrismaticPublisher(Node):
                 return True
             return abs(a - b) > self.output_epsilon
 
-        if (
+        values_changed = (
             changed(self.prev_values['bucket_pos'], self.bucket_pos) or
             changed(self.prev_values['arm_pos'], self.arm_pos) or
             changed(self.prev_values['boom_pos'], self.boom_pos) or
             changed(self.prev_values['body_yaw'], self.body_yaw) or
             changed(self.prev_values['left_track_velocity'], self.left_track_velocity) or
             changed(self.prev_values['right_track_velocity'], self.right_track_velocity)
-        ):
-            self.get_logger().info(
-                f"bucket: {self.bucket_pos:.3f}, arm: {self.arm_pos:.3f}, "
-                f"boom: {self.boom_pos:.3f}, body_yaw: {self.body_yaw:.3f} ({math.degrees(self.body_yaw):.1f}°), "
-                f"tracks: L={self.left_track_velocity:.2f} R={self.right_track_velocity:.2f}"
-            )
+        )
+        
+        if values_changed:
+            # Throttle logging to avoid excessive output that can cause system freeze
+            current_time = self.get_clock().now().seconds_nanoseconds()[0]
+            if current_time - self.last_log_time >= self.log_interval:
+                self.get_logger().info(
+                    f"bucket: {self.bucket_pos:.3f}, arm: {self.arm_pos:.3f}, "
+                    f"boom: {self.boom_pos:.3f}, body_yaw: {self.body_yaw:.3f} ({math.degrees(self.body_yaw):.1f}°), "
+                    f"tracks: L={self.left_track_velocity:.2f} R={self.right_track_velocity:.2f}"
+                )
+                self.last_log_time = current_time
+            
+            # Always update prev_values even if we don't log
             self.prev_values['bucket_pos'] = self.bucket_pos
             self.prev_values['arm_pos'] = self.arm_pos
             self.prev_values['boom_pos'] = self.boom_pos
@@ -305,10 +347,25 @@ class TeleopPrismaticPublisher(Node):
     def timer_callback(self):
         # Only update and publish after receiving first control command
         if self.initialized:
+            # Store previous state to check if we need to publish
+            prev_bucket = self.bucket_pos
+            prev_arm = self.arm_pos
+            prev_boom = self.boom_pos
+            prev_yaw = self.body_yaw
+            prev_left_track = self.left_track_velocity
+            prev_right_track = self.right_track_velocity
+            
             # Update positions based on latest controls (for continuous movement)
             self.update_positions()
-            # Publish joint state
-            self.publish_joint_state()
+            
+            # Only publish if values actually changed (reduces unnecessary message spam)
+            if (abs(self.bucket_pos - prev_bucket) > self.output_epsilon or
+                abs(self.arm_pos - prev_arm) > self.output_epsilon or
+                abs(self.boom_pos - prev_boom) > self.output_epsilon or
+                abs(self.body_yaw - prev_yaw) > self.output_epsilon or
+                abs(self.left_track_velocity - prev_left_track) > self.output_epsilon or
+                abs(self.right_track_velocity - prev_right_track) > self.output_epsilon):
+                self.publish_joint_state()
 
     def publish_joint_state(self):
         msg = JointState()
