@@ -122,11 +122,25 @@ class TeleopPrismaticPublisher(Node):
 
         # Log throttling: only log every N seconds to avoid excessive output
         self.last_log_time = 0.0
-        self.log_interval = 1.0  # Log at most once per second
+        self.log_interval = 2.0  # Log at most once per 2 seconds (reduced frequency)
+        self.log_count = 0  # Counter to limit total log messages
 
+        # Cached constants for performance
+        self.track_dead_zone = 0.5
+        self.track_dead_zone_inv = 1.0 / (1.0 - self.track_dead_zone)  # Pre-compute division
+        
+        # Pre-allocate message object to reduce allocation overhead
+        self.joint_msg = JointState()
+        self.joint_msg.name = self.joint_names
+        self.joint_msg.effort = [0.0] * len(self.joint_names)
+        
+        # Pre-allocate position and velocity lists
+        self.joint_msg.position = [0.0] * len(self.joint_names)
+        self.joint_msg.velocity = [0.0] * len(self.joint_names)
+        
         # Publish timer (for continuous updates even without new teleop messages)
-        # Reduced frequency to 20Hz (0.05s) to reduce CPU load
-        self.create_timer(0.05, self.timer_callback)
+        # Reduced frequency to 10Hz (0.1s) to reduce CPU load
+        self.create_timer(0.1, self.timer_callback)
 
         # Logs
         self.get_logger().info('Teleop Prismatic Publisher started')
@@ -148,71 +162,91 @@ class TeleopPrismaticPublisher(Node):
             self.get_logger().info('Published initial positions: bucket and arm at middle (0.0), boom at 2/3 height (0.667m)')
 
     def teleop_callback(self, msg: StringMsg):
-        # 添加调试信息：确认收到消息
-        # self.get_logger().info(f'[DEBUG] Received teleop message: {msg.data[:100]}...')
+        # Optimized callback with reduced dictionary lookups and string operations
         try:
             data = json.loads(msg.data)
-            # self.get_logger().info(f'[DEBUG] Parsed JSON successfully. Keys: {list(data.keys())}')
-            # Update only known keys; clamp to valid ranges
-            def clamp(val, min_v, max_v):
-                return max(min_v, min(max_v, val))
             
-            # Track changes only for specified keys
-            watched_keys = ['bucket', 'stick', 'boom', 'swing', 'rotation', 'left_track', 'right_track']
+            # Cache controls dict reference to reduce lookups
+            controls = self.latest_controls
+            epsilon = self.output_epsilon
             changed_flag = False
             
-            # Snapshot before
-            before = {k: self.latest_controls.get(k) for k in watched_keys}
+            # Fast path: check for watched keys first and update in one pass
+            # Use get() with default to avoid KeyError and reduce lookups
+            bucket_val = data.get('bucket')
+            stick_val = data.get('stick')
+            boom_val = data.get('boom')
+            swing_val = data.get('swing')
+            rotation_val = data.get('rotation')
+            left_track_val = data.get('left_track')
+            right_track_val = data.get('right_track')
             
-            if 'bucket' in data:
-                self.latest_controls['bucket'] = clamp(float(data['bucket']), -1.0, 1.0)
-            if 'stick' in data:
-                self.latest_controls['stick'] = clamp(float(data['stick']), -1.0, 1.0)
-            if 'boom' in data:
-                self.latest_controls['boom'] = clamp(float(data['boom']), -1.0, 1.0)
-            if 'swing' in data:
-                self.latest_controls['swing'] = clamp(float(data['swing']), -1.0, 1.0)
-            if 'rotation' in data:
-                self.latest_controls['rotation'] = clamp(float(data['rotation']), -1.0, 1.0)
-            if 'brake' in data:
-                self.latest_controls['brake'] = clamp(float(data['brake']), 0.0, 1.0)
-            if 'throttle' in data:
-                self.latest_controls['throttle'] = clamp(float(data['throttle']), 0.0, 1.0)
+            # Update and check changes in one pass (reduces dictionary lookups)
+            if bucket_val is not None:
+                new_val = max(-1.0, min(1.0, float(bucket_val)))
+                if abs(controls['bucket'] - new_val) > epsilon:
+                    controls['bucket'] = new_val
+                    changed_flag = True
+            if stick_val is not None:
+                new_val = max(-1.0, min(1.0, float(stick_val)))
+                if abs(controls['stick'] - new_val) > epsilon:
+                    controls['stick'] = new_val
+                    changed_flag = True
+            if boom_val is not None:
+                new_val = max(-1.0, min(1.0, float(boom_val)))
+                if abs(controls['boom'] - new_val) > epsilon:
+                    controls['boom'] = new_val
+                    changed_flag = True
+            if swing_val is not None:
+                new_val = max(-1.0, min(1.0, float(swing_val)))
+                if abs(controls['swing'] - new_val) > epsilon:
+                    controls['swing'] = new_val
+                    changed_flag = True
+            if rotation_val is not None:
+                new_val = max(-1.0, min(1.0, float(rotation_val)))
+                if abs(controls['rotation'] - new_val) > epsilon:
+                    controls['rotation'] = new_val
+                    changed_flag = True
+            if left_track_val is not None:
+                new_val = max(-1.0, min(1.0, float(left_track_val)))
+                if abs(controls['left_track'] - new_val) > epsilon:
+                    controls['left_track'] = new_val
+                    changed_flag = True
+            if right_track_val is not None:
+                new_val = max(-1.0, min(1.0, float(right_track_val)))
+                if abs(controls['right_track'] - new_val) > epsilon:
+                    controls['right_track'] = new_val
+                    changed_flag = True
+            
+            # Update other fields (less frequently changed, no change detection needed)
+            brake_val = data.get('brake')
+            if brake_val is not None:
+                controls['brake'] = max(0.0, min(1.0, float(brake_val)))
+            throttle_val = data.get('throttle')
+            if throttle_val is not None:
+                controls['throttle'] = max(0.0, min(1.0, float(throttle_val)))
             if 'gear' in data:
-                self.latest_controls['gear'] = str(data['gear'])
-            if 'left_track' in data:
-                self.latest_controls['left_track'] = clamp(float(data['left_track']), -1.0, 1.0)
-            if 'right_track' in data:
-                self.latest_controls['right_track'] = clamp(float(data['right_track']), -1.0, 1.0)
+                controls['gear'] = str(data['gear'])
             if 'device_type' in data:
-                self.latest_controls['device_type'] = str(data['device_type'])
+                controls['device_type'] = str(data['device_type'])
             if 'timestamp' in data:
-                self.latest_controls['timestamp'] = int(data['timestamp'])
-            
-            # Detect changes
-            for k in watched_keys:
-                if k in data:
-                    prev_v = before.get(k)
-                    new_v = self.latest_controls.get(k)
-                    if prev_v is None or abs(float(prev_v) - float(new_v)) > self.output_epsilon:
-                        changed_flag = True
-                        # self.get_logger().info(f'[DEBUG] Detected change in {k}: {prev_v} -> {new_v}')
-                        break
-
-            # Ensure first command always triggers initialization and processing
-            if not self.initialized:
-                changed_flag = True
+                controls['timestamp'] = int(data['timestamp'])
             
             # If relevant inputs changed, update states immediately
             if changed_flag:
-                # self.get_logger().info('[DEBUG] Processing changed controls...')
                 self.update_positions()
                 self.publish_joint_state()
-            # else:
-            #     self.get_logger().info('[DEBUG] No significant changes detected')
                 
+        except (ValueError, TypeError, KeyError) as e:
+            # Limit error logging to avoid spam
+            if self.log_count < 10:  # Only log first 10 errors
+                self.get_logger().warn(f'Failed to parse /controls/teleop JSON: {e}')
+                self.log_count += 1
         except Exception as e:
-            self.get_logger().warn(f'Failed to parse /controls/teleop JSON: {e}')
+            # Catch-all for unexpected errors, but limit logging
+            if self.log_count < 10:
+                self.get_logger().warn(f'Unexpected error in teleop_callback: {e}')
+                self.log_count += 1
 
     def joint_state_callback(self, msg: JointState):
         # Note: Positions are now initialized to middle position (0.0) on startup
@@ -283,34 +317,32 @@ class TeleopPrismaticPublisher(Node):
         
         # Map left_track and right_track (-1..1) to track velocities (differential drive model)
         # Direct mapping to wheel angular velocities (rad/s or sim units)
-        left_track = float(self.latest_controls.get('left_track', 0.0))
-        right_track = float(self.latest_controls.get('right_track', 0.0))
+        # Use cached constants for performance
+        left_track = self.latest_controls.get('left_track', 0.0)
+        right_track = self.latest_controls.get('right_track', 0.0)
+        dead_zone = self.track_dead_zone
+        dead_zone_inv = self.track_dead_zone_inv
         
-        # Dead zone: -0.5 to 0.5 range produces no movement
-        # Apply dead zone by clamping values outside the dead zone
-        track_dead_zone = 0.5
-        if abs(left_track) <= track_dead_zone:
+        # Dead zone: -0.5 to 0.5 range produces no movement (optimized)
+        abs_left = abs(left_track)
+        if abs_left <= dead_zone:
             left_track = 0.0
         else:
-            # Scale the remaining range (-1 to -0.5 and 0.5 to 1) to full range
-            if left_track > 0:
-                left_track = (left_track - track_dead_zone) / (1.0 - track_dead_zone)
-            else:
-                left_track = (left_track + track_dead_zone) / (1.0 - track_dead_zone)
+            # Scale the remaining range using pre-computed inverse
+            left_track = (left_track - (dead_zone if left_track > 0 else -dead_zone)) * dead_zone_inv
         
-        if abs(right_track) <= track_dead_zone:
+        abs_right = abs(right_track)
+        if abs_right <= dead_zone:
             right_track = 0.0
         else:
-            # Scale the remaining range (-1 to -0.5 and 0.5 to 1) to full range
-            if right_track > 0:
-                right_track = (right_track - track_dead_zone) / (1.0 - track_dead_zone)
-            else:
-                right_track = (right_track + track_dead_zone) / (1.0 - track_dead_zone)
+            # Scale the remaining range using pre-computed inverse
+            right_track = (right_track - (dead_zone if right_track > 0 else -dead_zone)) * dead_zone_inv
         
         # Sign convention: forward ≈ -500, backward ≈ +500
         # Note: direction corrected - positive input now maps to forward (negative velocity)
-        self.left_track_velocity = left_track * self.track_velocity_scale
-        self.right_track_velocity = right_track * self.track_velocity_scale
+        scale = self.track_velocity_scale
+        self.left_track_velocity = left_track * scale
+        self.right_track_velocity = right_track * scale
 
         # Only output when values change beyond epsilon
         def changed(a, b):
@@ -329,22 +361,28 @@ class TeleopPrismaticPublisher(Node):
         
         if values_changed:
             # Throttle logging to avoid excessive output that can cause system freeze
+            # Use simpler time check to reduce overhead
             current_time = self.get_clock().now().seconds_nanoseconds()[0]
             if current_time - self.last_log_time >= self.log_interval:
+                # Use % formatting instead of f-strings for better performance with logging
                 self.get_logger().info(
-                    f"bucket: {self.bucket_pos:.3f}, arm: {self.arm_pos:.3f}, "
-                    f"boom: {self.boom_pos:.3f}, body_yaw: {self.body_yaw:.3f} ({math.degrees(self.body_yaw):.1f}°), "
-                    f"tracks: L={self.left_track_velocity:.2f} R={self.right_track_velocity:.2f}"
+                    "bucket: %.3f, arm: %.3f, boom: %.3f, body_yaw: %.3f (%.1f°), "
+                    "tracks: L=%.2f R=%.2f" % (
+                        self.bucket_pos, self.arm_pos, self.boom_pos,
+                        self.body_yaw, math.degrees(self.body_yaw),
+                        self.left_track_velocity, self.right_track_velocity
+                    )
                 )
                 self.last_log_time = current_time
             
             # Always update prev_values even if we don't log
-            self.prev_values['bucket_pos'] = self.bucket_pos
-            self.prev_values['arm_pos'] = self.arm_pos
-            self.prev_values['boom_pos'] = self.boom_pos
-            self.prev_values['body_yaw'] = self.body_yaw
-            self.prev_values['left_track_velocity'] = self.left_track_velocity
-            self.prev_values['right_track_velocity'] = self.right_track_velocity
+            prev = self.prev_values
+            prev['bucket_pos'] = self.bucket_pos
+            prev['arm_pos'] = self.arm_pos
+            prev['boom_pos'] = self.boom_pos
+            prev['body_yaw'] = self.body_yaw
+            prev['left_track_velocity'] = self.left_track_velocity
+            prev['right_track_velocity'] = self.right_track_velocity
 
     def timer_callback(self):
         # Only update and publish after receiving first control command
@@ -370,30 +408,34 @@ class TeleopPrismaticPublisher(Node):
                 self.publish_joint_state()
 
     def publish_joint_state(self):
-        msg = JointState()
+        # Use pre-allocated message object to reduce allocation overhead
+        msg = self.joint_msg
         msg.header.stamp = self.get_clock().now().to_msg()
-        msg.name = self.joint_names
-        msg.position = [
-            -self.bucket_pos,  # Inverted like in keyboard_prismatic_publisher
-            -self.arm_pos,     # Inverted like in keyboard_prismatic_publisher
-            -self.boom_pos,    # Inverted like in keyboard_prismatic_publisher
-            self.body_yaw,
-            float('nan'),      # front_left_wheel_angle (velocity control)
-            float('nan'),      # back_left_wheel_angle (velocity control)
-            float('nan'),      # front_right_wheel_angle (velocity control)
-            float('nan'),      # back_right_wheel_angle (velocity control)
-        ]
-        msg.velocity = [
-            0.0,                        # bucket_linear
-            0.0,                        # arm_linear
-            0.0,                        # boom_linear
-            0.0,                        # body_rotate
-            self.left_track_velocity,   # front_left_wheel_angle
-            self.left_track_velocity,   # back_left_wheel_angle
-            self.right_track_velocity,  # front_right_wheel_angle
-            self.right_track_velocity,  # back_right_wheel_angle
-        ]
-        msg.effort = [0.0] * len(self.joint_names)
+        
+        # Update position and velocity lists in-place (faster than creating new lists)
+        pos = msg.position
+        vel = msg.velocity
+        
+        # Update positions (inverted for bucket, arm, boom)
+        pos[0] = -self.bucket_pos
+        pos[1] = -self.arm_pos
+        pos[2] = -self.boom_pos
+        pos[3] = self.body_yaw
+        # Wheel angles use NaN (velocity control)
+        pos[4] = float('nan')
+        pos[5] = float('nan')
+        pos[6] = float('nan')
+        pos[7] = float('nan')
+        
+        # Update velocities
+        vel[0] = 0.0  # bucket_linear
+        vel[1] = 0.0  # arm_linear
+        vel[2] = 0.0  # boom_linear
+        vel[3] = 0.0  # body_rotate
+        vel[4] = self.left_track_velocity   # front_left_wheel_angle
+        vel[5] = self.left_track_velocity   # back_left_wheel_angle
+        vel[6] = self.right_track_velocity  # front_right_wheel_angle
+        vel[7] = self.right_track_velocity  # back_right_wheel_angle
 
         self.joint_pub.publish(msg)
 
