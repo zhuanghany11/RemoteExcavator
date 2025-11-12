@@ -7,18 +7,18 @@
                 double radius = 327.0840087890625
             }
             dictionary Perspective = {
-                double3 position = (19.396251039118955, -4.153173568557566, 4.5740639795222835)
-                double3 target = (11.824679466019262, -8.556775099368547, 1.8324593440823795)
+                double3 position = (17.70074103352749, -18.066536681091268, 14.873466736757974)
+                double3 target = (5.484687429618228, -8.762001940345671, 5.732241445425313)
             }
             dictionary Right = {
                 double3 position = (9.102229805280327, -50011.284248769734, 3.612152776691489)
                 double radius = 39.513641357421875
             }
             dictionary Top = {
-                double3 position = (11.43970809437414, -8.271897377741686, 5)
+                double3 position = (10.729595235124377, -8.208776234697263, 5)
                 double radius = 11.566949462890625
             }
-            string boundCamera = "/OmniverseKit_Persp"
+            string boundCamera = "/World/PC2000_full/excavator/main_body/main_body/left_camera"
         }
         dictionary metricsAssembler = {
             dictionary "/World/Shacman_F3000_Dump_Truck" = {
@@ -155,7 +155,7 @@ def "Render" (
                 no_delete = true
             )
             {
-                rel camera = </World/PC2000_full/excavator/main_body/main_body/front_camera>
+                rel camera = </World/PC2000_full/excavator/main_body/main_body/left_camera>
                 token omni:rtx:background:source:texture:textureMode = "repeatMirrored"
                 token omni:rtx:background:source:type = "domeLight"
                 bool omni:rtx:dlss:frameGeneration = 0
@@ -988,6 +988,139 @@ def "Render" (
                 custom bool overrideClipRange = 0
                 uniform int2 resolution = (1280, 720)
             }
+
+            def RenderProduct "Replicator_49" (
+                prepend apiSchemas = ["OmniRtxSettingsCommonAdvancedAPI_1", "OmniRtxSettingsRtAdvancedAPI_1", "OmniRtxSettingsPtAdvancedAPI_1", "OmniRtxPostColorGradingAPI_1", "OmniRtxPostChromaticAberrationAPI_1", "OmniRtxPostBloomPhysicalAPI_1", "OmniRtxPostMatteObjectAPI_1", "OmniRtxPostCompositingAPI_1", "OmniRtxPostDofAPI_1", "OmniRtxPostMotionBlurAPI_1", "OmniRtxPostTvNoiseAPI_1", "OmniRtxPostTonemapIrayReinhardAPI_1", "OmniRtxPostDebugSettingsAPI_1", "OmniRtxDebugSettingsAPI_1"]
+                hide_in_stage_window = true
+                no_delete = true
+            )
+            {
+                rel camera = </World/PC2000_full/excavator/main_body/main_body/front_surround_camera>
+                custom string ogPostProcessPath = "/Render/OmniverseKit/HydraTextures/Replicator_49/PostRender"
+                bool omni:rtx:material:db:syncLoads = 1
+                bool omni:rtx:rt:ecoMode:enabled = 0
+                bool omni:rtx:scene:hydra:materialSyncLoads = 1
+                rel orderedVars = [
+                    </Render/Vars/LdrColorSD>,
+                    </Render/Vars/LdrColor>,
+                ]
+                custom bool overrideClipRange = 0
+                uniform int2 resolution = (1280, 720)
+            }
+
+            def RenderProduct "Replicator_50" (
+                prepend apiSchemas = ["OmniRtxSettingsCommonAdvancedAPI_1", "OmniRtxSettingsRtAdvancedAPI_1", "OmniRtxSettingsPtAdvancedAPI_1", "OmniRtxPostColorGradingAPI_1", "OmniRtxPostChromaticAberrationAPI_1", "OmniRtxPostBloomPhysicalAPI_1", "OmniRtxPostMatteObjectAPI_1", "OmniRtxPostCompositingAPI_1", "OmniRtxPostDofAPI_1", "OmniRtxPostMotionBlurAPI_1", "OmniRtxPostTvNoiseAPI_1", "OmniRtxPostTonemapIrayReinhardAPI_1", "OmniRtxPostDebugSettingsAPI_1", "OmniRtxDebugSettingsAPI_1"]
+                hide_in_stage_window = true
+                no_delete = true
+            )
+            {
+                rel camera = </World/PC2000_full/excavator/main_body/main_body/right_camera>
+                custom string ogPostProcessPath = "/Render/OmniverseKit/HydraTextures/Replicator_50/PostRender"
+                bool omni:rtx:material:db:syncLoads = 1
+                bool omni:rtx:rt:ecoMode:enabled = 0
+                bool omni:rtx:scene:hydra:materialSyncLoads = 1
+                rel orderedVars = [
+                    </Render/Vars/LdrColorSD>,
+                    </Render/Vars/LdrColor>,
+                ]
+                custom bool overrideClipRange = 0
+                uniform int2 resolution = (1280, 720)
+            }
+
+            def RenderProduct "Replicator_51" (
+                prepend apiSchemas = ["OmniRtxSettingsCommonAdvancedAPI_1", "OmniRtxSettingsRtAdvancedAPI_1", "OmniRtxSettingsPtAdvancedAPI_1", "OmniRtxPostColorGradingAPI_1", "OmniRtxPostChromaticAberrationAPI_1", "OmniRtxPostBloomPhysicalAPI_1", "OmniRtxPostMatteObjectAPI_1", "OmniRtxPostCompositingAPI_1", "OmniRtxPostDofAPI_1", "OmniRtxPostMotionBlurAPI_1", "OmniRtxPostTvNoiseAPI_1", "OmniRtxPostTonemapIrayReinhardAPI_1", "OmniRtxPostDebugSettingsAPI_1", "OmniRtxDebugSettingsAPI_1"]
+                hide_in_stage_window = true
+                no_delete = true
+            )
+            {
+                rel camera = </World/PC2000_full/excavator/main_body/main_body/front_camera>
+                custom string ogPostProcessPath = "/Render/OmniverseKit/HydraTextures/Replicator_51/PostRender"
+                bool omni:rtx:material:db:syncLoads = 1
+                bool omni:rtx:rt:ecoMode:enabled = 0
+                bool omni:rtx:scene:hydra:materialSyncLoads = 1
+                rel orderedVars = [
+                    </Render/Vars/LdrColorSD>,
+                    </Render/Vars/LdrColor>,
+                ]
+                custom bool overrideClipRange = 0
+                uniform int2 resolution = (1280, 720)
+            }
+
+            def RenderProduct "Replicator_52" (
+                prepend apiSchemas = ["OmniRtxSettingsCommonAdvancedAPI_1", "OmniRtxSettingsRtAdvancedAPI_1", "OmniRtxSettingsPtAdvancedAPI_1", "OmniRtxPostColorGradingAPI_1", "OmniRtxPostChromaticAberrationAPI_1", "OmniRtxPostBloomPhysicalAPI_1", "OmniRtxPostMatteObjectAPI_1", "OmniRtxPostCompositingAPI_1", "OmniRtxPostDofAPI_1", "OmniRtxPostMotionBlurAPI_1", "OmniRtxPostTvNoiseAPI_1", "OmniRtxPostTonemapIrayReinhardAPI_1", "OmniRtxPostDebugSettingsAPI_1", "OmniRtxDebugSettingsAPI_1"]
+                hide_in_stage_window = true
+                no_delete = true
+            )
+            {
+                rel camera = </World/PC2000_full/excavator/main_body/main_body/rear_camera>
+                custom string ogPostProcessPath = "/Render/OmniverseKit/HydraTextures/Replicator_52/PostRender"
+                bool omni:rtx:material:db:syncLoads = 1
+                bool omni:rtx:rt:ecoMode:enabled = 0
+                bool omni:rtx:scene:hydra:materialSyncLoads = 1
+                rel orderedVars = [
+                    </Render/Vars/LdrColorSD>,
+                    </Render/Vars/LdrColor>,
+                ]
+                custom bool overrideClipRange = 0
+                uniform int2 resolution = (1280, 720)
+            }
+
+            def RenderProduct "Replicator_53" (
+                prepend apiSchemas = ["OmniRtxSettingsCommonAdvancedAPI_1", "OmniRtxSettingsRtAdvancedAPI_1", "OmniRtxSettingsPtAdvancedAPI_1", "OmniRtxPostColorGradingAPI_1", "OmniRtxPostChromaticAberrationAPI_1", "OmniRtxPostBloomPhysicalAPI_1", "OmniRtxPostMatteObjectAPI_1", "OmniRtxPostCompositingAPI_1", "OmniRtxPostDofAPI_1", "OmniRtxPostMotionBlurAPI_1", "OmniRtxPostTvNoiseAPI_1", "OmniRtxPostTonemapIrayReinhardAPI_1", "OmniRtxPostDebugSettingsAPI_1", "OmniRtxDebugSettingsAPI_1"]
+                hide_in_stage_window = true
+                no_delete = true
+            )
+            {
+                rel camera = </World/PC2000_full/excavator/main_body/main_body/left_camera>
+                custom string ogPostProcessPath = "/Render/OmniverseKit/HydraTextures/Replicator_53/PostRender"
+                bool omni:rtx:material:db:syncLoads = 1
+                bool omni:rtx:rt:ecoMode:enabled = 0
+                bool omni:rtx:scene:hydra:materialSyncLoads = 1
+                rel orderedVars = [
+                    </Render/Vars/LdrColorSD>,
+                    </Render/Vars/LdrColor>,
+                ]
+                custom bool overrideClipRange = 0
+                uniform int2 resolution = (1280, 720)
+            }
+
+            def RenderProduct "Replicator_54" (
+                prepend apiSchemas = ["OmniRtxSettingsCommonAdvancedAPI_1", "OmniRtxSettingsRtAdvancedAPI_1", "OmniRtxSettingsPtAdvancedAPI_1", "OmniRtxPostColorGradingAPI_1", "OmniRtxPostChromaticAberrationAPI_1", "OmniRtxPostBloomPhysicalAPI_1", "OmniRtxPostMatteObjectAPI_1", "OmniRtxPostCompositingAPI_1", "OmniRtxPostDofAPI_1", "OmniRtxPostMotionBlurAPI_1", "OmniRtxPostTvNoiseAPI_1", "OmniRtxPostTonemapIrayReinhardAPI_1", "OmniRtxPostDebugSettingsAPI_1", "OmniRtxDebugSettingsAPI_1"]
+                hide_in_stage_window = true
+                no_delete = true
+            )
+            {
+                rel camera = </World/PC2000_full/excavator/boom/boom/boom_camera>
+                custom string ogPostProcessPath = "/Render/OmniverseKit/HydraTextures/Replicator_54/PostRender"
+                bool omni:rtx:material:db:syncLoads = 1
+                bool omni:rtx:rt:ecoMode:enabled = 0
+                bool omni:rtx:scene:hydra:materialSyncLoads = 1
+                rel orderedVars = [
+                    </Render/Vars/LdrColorSD>,
+                    </Render/Vars/LdrColor>,
+                ]
+                custom bool overrideClipRange = 0
+                uniform int2 resolution = (1280, 720)
+            }
+
+            def RenderProduct "Replicator_55" (
+                prepend apiSchemas = ["OmniRtxSettingsCommonAdvancedAPI_1", "OmniRtxSettingsRtAdvancedAPI_1", "OmniRtxSettingsPtAdvancedAPI_1", "OmniRtxPostColorGradingAPI_1", "OmniRtxPostChromaticAberrationAPI_1", "OmniRtxPostBloomPhysicalAPI_1", "OmniRtxPostMatteObjectAPI_1", "OmniRtxPostCompositingAPI_1", "OmniRtxPostDofAPI_1", "OmniRtxPostMotionBlurAPI_1", "OmniRtxPostTvNoiseAPI_1", "OmniRtxPostTonemapIrayReinhardAPI_1", "OmniRtxPostDebugSettingsAPI_1", "OmniRtxDebugSettingsAPI_1"]
+                hide_in_stage_window = true
+                no_delete = true
+            )
+            {
+                rel camera = </World/PC2000_full/excavator/main_body/main_body/Airy_new>
+                custom string ogPostProcessPath = "/Render/OmniverseKit/HydraTextures/Replicator_55/PostRender"
+                bool omni:rtx:material:db:syncLoads = 1
+                bool omni:rtx:rt:ecoMode:enabled = 0
+                bool omni:rtx:scene:hydra:materialSyncLoads = 1
+                rel orderedVars = [
+                    </Render/Vars/GenericModelOutput>,
+                    </Render/Vars/RtxSensorMetadata>,
+                ]
+                custom bool overrideClipRange = 0
+                uniform int2 resolution = (1280, 720)
+            }
         }
     }
 
@@ -1043,6 +1176,13 @@ def "Render" (
             </Render/OmniverseKit/HydraTextures/Replicator_46>,
             </Render/OmniverseKit/HydraTextures/Replicator_47>,
             </Render/OmniverseKit/HydraTextures/Replicator_48>,
+            </Render/OmniverseKit/HydraTextures/Replicator_49>,
+            </Render/OmniverseKit/HydraTextures/Replicator_50>,
+            </Render/OmniverseKit/HydraTextures/Replicator_51>,
+            </Render/OmniverseKit/HydraTextures/Replicator_52>,
+            </Render/OmniverseKit/HydraTextures/Replicator_53>,
+            </Render/OmniverseKit/HydraTextures/Replicator_54>,
+            </Render/OmniverseKit/HydraTextures/Replicator_55>,
         ]
     }
 
@@ -2541,7 +2681,7 @@ def "World"
             prepend payload = @./assets/truck/Shacman_F3000_Dump_Truck.usdz@
         )
         {
-            quatf xformOp:orient = (0.70710677, 0, 0, 0.70710677)
+            quatf xformOp:orient = (-0.70710677, 0, 0, 0.70710677)
             double xformOp:rotateX:unitsResolve = 90
             float3 xformOp:scale = (1, 1, 1)
             double3 xformOp:scale:unitsResolve = (0.04, 0.04, 0.04)
@@ -3354,7 +3494,7 @@ def "World"
     }
 
     def Scope "Particles" (
-        active = false
+        active = true
     )
     {
         def Mesh "Cube" (
@@ -3500,14 +3640,14 @@ def "World"
                         float focalLength = 3
                         float focusDistance = 200
                         float horizontalAperture = 20.955
-                        custom uniform vector3d omni:kit:centerOfInterest = (0, 0, -200.05166350469725)
+                        custom uniform vector3d omni:kit:centerOfInterest = (0, 0, -197.74573976941994)
                         token projection = "perspective"
                         uniform token purpose = "proxy"
                         float verticalAperture = 15.2908
                         token visibility = "inherited"
                         quatd xformOp:orient = (0.9063077870366499, 0.4226182617406995, 0, 0)
                         double3 xformOp:scale = (1, 1, 1)
-                        double3 xformOp:translate = (1.0588359090918438, 1.6508794483708744, 4.645716094910354)
+                        double3 xformOp:translate = (-1.1892618040822942, 1.395532315871078, 2.6952206110347103)
                         uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
                     }
 
@@ -3523,9 +3663,9 @@ def "World"
                         custom uniform vector3d omni:kit:centerOfInterest = (0, 0, -22.514378575829085)
                         token projection = "perspective"
                         float verticalAperture = 15.2908
-                        quatd xformOp:orient = (0.47257406151235665, 0.4513552609301849, 0.5320161993465236, 0.5384337920759061)
+                        quatd xformOp:orient = (0.5000000000000001, 0.5, 0.5, 0.49999999999999994)
                         double3 xformOp:scale = (1, 1, 1)
-                        double3 xformOp:translate = (-1.9154799283951327, -0.5042370958771283, 0.5842410635047615)
+                        double3 xformOp:translate = (-2.1049707850062713, 0.29481496025777076, 0.7394497799553119)
                         uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
                     }
 
@@ -3545,7 +3685,7 @@ def "World"
                         token visibility = "inherited"
                         quatd xformOp:orient = (0.5188615373764704, 0.436819676962613, -0.4579861227488277, -0.5746477061810131)
                         double3 xformOp:scale = (1, 1, 1)
-                        double3 xformOp:translate = (1.7383786860500887, -1.3905137057434889, 1.0178912190925207)
+                        double3 xformOp:translate = (2.116377900378234, 0.16692788887795196, 0.8600199053824031)
                         uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
                     }
 
@@ -3565,9 +3705,9 @@ def "World"
                         uniform token purpose = "proxy"
                         float verticalAperture = 15.2908
                         token visibility = "inherited"
-                        quatd xformOp:orient = (0.07603953166960017, -0.03328744169996985, 0.6552795467314425, 0.7508119947656499)
+                        quatd xformOp:orient = (6.123233995736766e-17, -4.329780281177466e-17, 0.7071067811865475, 0.7071067811865476)
                         double3 xformOp:scale = (1, 1, 1)
-                        double3 xformOp:translate = (-0.5198604596602419, -3.888756090133631, 1.07606124585921)
+                        double3 xformOp:translate = (0, -3.5, 1.6)
                         uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
                     }
 
@@ -4124,8 +4264,8 @@ def "World"
                     }
                 )
                 prepend uint inputs:execIn.connect = </World/PC2000_full/ROS2_Camera/isaac_run_one_simulation_frame.outputs:step>
-                custom uint inputs:height
-                custom uint inputs:width
+                custom uint inputs:height = 1280
+                custom uint inputs:width = 720
                 token node:type = "isaacsim.core.nodes.IsaacCreateRenderProduct"
                 int node:typeVersion = 2
                 custom uint outputs:execOut (
@@ -4232,8 +4372,8 @@ def "World"
                     }
                 )
                 prepend uint inputs:execIn.connect = </World/PC2000_full/ROS2_Camera/isaac_run_one_simulation_frame.outputs:step>
-                custom uint inputs:height
-                custom uint inputs:width
+                custom uint inputs:height = 1280
+                custom uint inputs:width = 720
                 token node:type = "isaacsim.core.nodes.IsaacCreateRenderProduct"
                 int node:typeVersion = 2
                 custom uint outputs:execOut (
