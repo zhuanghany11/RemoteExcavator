@@ -64,7 +64,8 @@ class TeleopPrismaticPublisher(Node):
         # Initialize to middle position (0.0) on startup
         self.bucket_pos = 0.0
         self.arm_pos = 0.0
-        self.boom_pos = 0.0
+        # Initialize boom to 2/3 of maximum height (lifted position)
+        self.boom_pos = 1.0 * 2.0 / 3.0  # 2/3 of boom_limit (1.0m) = 0.667m
         self.body_yaw = 0.0
         
         # Track velocities (for differential track model)
@@ -132,18 +133,19 @@ class TeleopPrismaticPublisher(Node):
         self.get_logger().info('Topic: %s' % topic)
         self.get_logger().info('Joint order: %s' % ', '.join(self.joint_names))
         self.get_logger().info('Listening to /controls/teleop for control commands')
-        self.get_logger().info('Initializing bucket, arm, and boom to middle position (0.0)')
+        self.get_logger().info('Initializing bucket and arm to middle position (0.0)')
+        self.get_logger().info(f'Initializing boom to 2/3 height position ({self.boom_pos:.3f}m)')
         
-        # Publish initial middle positions after a short delay to ensure subscribers are ready
+        # Publish initial positions after a short delay to ensure subscribers are ready
         self.initial_publish_done = False
         self.create_timer(0.5, self.publish_initial_positions)
 
     def publish_initial_positions(self):
-        """Publish initial middle positions once on startup"""
+        """Publish initial positions once on startup"""
         if not self.initial_publish_done:
             self.publish_joint_state()
             self.initial_publish_done = True
-            self.get_logger().info('Published initial middle positions for bucket, arm, and boom')
+            self.get_logger().info('Published initial positions: bucket and arm at middle (0.0), boom at 2/3 height (0.667m)')
 
     def teleop_callback(self, msg: StringMsg):
         # 添加调试信息：确认收到消息

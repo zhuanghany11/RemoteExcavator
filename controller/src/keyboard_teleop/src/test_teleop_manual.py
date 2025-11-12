@@ -139,27 +139,45 @@ def main(args=None):
                     # 0) 安全起始：停止
                     hold_control(0.0, 0.0, 0.0, 0.0, 0.5)
 
-                    # 1) 靠近料堆：放大臂、伸小臂、开斗（更大幅度，延长时间）
-                    hold_control(bucket=-1.0, stick=+1.0, boom=-1.0, swing=0.0, duration_s=4.0)
+                    # 1) 先抬高大臂到安全高度，避免碰撞
+                    hold_control(bucket=0.0, stick=0.0, boom=+0.5, swing=0.0, duration_s=2.0)
 
-                    # 2) 切入并铲装：强力收斗、继续下压，微收小臂
+                    # 2) 伸出小臂并打开铲斗（在安全高度下进行）
+                    hold_control(bucket=-1.0, stick=+1.0, boom=+0.3, swing=0.0, duration_s=3.0)
+
+                    # 3) 下降大臂到作业位置（小臂已伸出，避免碰撞）
+                    hold_control(bucket=-1.0, stick=+1.0, boom=-0.8, swing=0.0, duration_s=2.5)
+
+                    # 4) 切入并铲装：强力收斗、继续下压，微收小臂
                     hold_control(bucket=+1.0, stick=-0.5, boom=-0.8, swing=0.0, duration_s=2.5)
 
-                    # 3) 提升铲斗：大幅抬大臂、强力收小臂
-                    hold_control(bucket=+1.0, stick=-1.0, boom=+1.0, swing=0.0, duration_s=3.0)
+                    # 5) 提升铲斗：先抬大臂，再收小臂（避免碰撞）
+                    hold_control(bucket=+1.0, stick=-0.3, boom=+0.6, swing=0.0, duration_s=2.0)
+                    hold_control(bucket=+1.0, stick=-1.0, boom=+0.9, swing=0.0, duration_s=2.0)
 
-                    # 4) 回转到卸料位：保持抬臂，快速回转
+                    # 6) 回转到卸料位：保持抬臂，快速回转
                     # 注意 teleop 节点对 swing 有符号翻转
                     hold_control(bucket=+0.9, stick=-0.4, boom=+0.9, swing=+0.9, duration_s=3.0)
 
-                    # 5) 倾倒：完全打开铲斗
+                    # 7) 倾倒：完全打开铲斗
                     hold_control(bucket=-1.0, stick=0.0, boom=+0.6, swing=0.0, duration_s=1.8)
 
-                    # 6) 回到作业位：回转回去，放臂，斗回中
-                    hold_control(bucket=0.0, stick=+0.4, boom=-0.9, swing=-0.9, duration_s=3.0)
+                    # 8) 回到作业位：先回转，保持安全高度
+                    hold_control(bucket=-0.5, stick=0.0, boom=+0.7, swing=-0.9, duration_s=2.5)
 
-                    # 7) 稳定
-                    hold_control(0.0, 0.0, 0.0, 0.0, 0.8)
+                    # 9) 先收铲斗到中间位置（在安全高度下，避免碰撞）
+                    hold_control(bucket=+0.5, stick=0.0, boom=+0.7, swing=0.0, duration_s=2.0)
+
+                    # 10) 再收小臂到中间位置（在安全高度下）
+                    hold_control(bucket=0.0, stick=-0.5, boom=+0.7, swing=0.0, duration_s=2.0)
+
+                    # 11) 调整大臂到初始高度（三分之二高度，约+0.667）
+                    # 注意：初始状态大臂在三分之二高度（0.667m），小臂和铲斗在中间位置（0.0）
+                    # 由于是增量控制，从+0.7调整到+0.667需要小幅下降
+                    hold_control(bucket=0.0, stick=0.0, boom=-0.1, swing=0.0, duration_s=1.0)
+
+                    # 12) 稳定在初始状态（大臂三分之二高度，小臂和铲斗中间位置）
+                    hold_control(bucket=0.0, stick=0.0, boom=0.0, swing=0.0, duration_s=0.8)
 
                     print('Automatic digging cycle finished.')
                 except KeyboardInterrupt:
