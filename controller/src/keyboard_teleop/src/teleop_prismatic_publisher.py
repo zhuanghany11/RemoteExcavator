@@ -126,8 +126,12 @@ class TeleopPrismaticPublisher(Node):
         self.log_count = 0  # Counter to limit total log messages
 
         # Cached constants for performance
-        self.track_dead_zone = 0.5
-        self.track_dead_zone_inv = 1.0 / (1.0 - self.track_dead_zone)  # Pre-compute division
+        # Dead zone for all controls: -0.5 to 0.5
+        self.control_dead_zone = 0.5
+        self.control_dead_zone_inv = 1.0 / (1.0 - self.control_dead_zone)  # Pre-compute division
+        # Keep track_dead_zone for backward compatibility (same value)
+        self.track_dead_zone = self.control_dead_zone
+        self.track_dead_zone_inv = self.control_dead_zone_inv
         
         # Pre-allocate message object to reduce allocation overhead
         self.joint_msg = JointState()
@@ -290,30 +294,53 @@ class TeleopPrismaticPublisher(Node):
             except Exception as e:
                 self.get_logger().warn(f'Failed to sync joint states: {e}')
 
+    def apply_dead_zone(self, input_val):
+        """Apply dead zone to input value (-0.5 to 0.5 range produces 0)
+        Maps [-1, -0.5] U [0.5, 1] to [-1, 1]
+        """
+        dead_zone = self.control_dead_zone
+        dead_zone_inv = self.control_dead_zone_inv
+        
+        if abs(input_val) <= dead_zone:
+            return 0.0
+        else:
+            if input_val > 0:
+                # Map [0.5, 1] -> [0, 1]
+                return (input_val - dead_zone) * dead_zone_inv
+            else:
+                # Map [-1, -0.5] -> [-1, 0]
+                return (input_val + dead_zone) * dead_zone_inv
+
     def update_positions(self):
         # Positions are already initialized to middle position (0.0) in __init__
-        # Map bucket (-1..1) to bucket prismatic position
+        # Map bucket (-1..1) to bucket prismatic position with dead zone
         # Positive input -> retract bucket (negative position) - direction inverted
-        bucket = float(self.latest_controls['bucket'])
+        bucket_raw = float(self.latest_controls['bucket'])
+        bucket = self.apply_dead_zone(bucket_raw)
         delta_bucket = -bucket * self.step_bucket_linear  # Inverted direction
         self.bucket_pos = max(-self.lin_limit, min(self.lin_limit, self.bucket_pos + delta_bucket))
 
-        # Map stick (-1..1) to arm prismatic position
+        # Map stick (-1..1) to arm prismatic position with dead zone
         # Positive input -> retract arm (negative position) - direction inverted
-        stick = float(self.latest_controls['stick'])
+        stick_raw = float(self.latest_controls['stick'])
+        stick = self.apply_dead_zone(stick_raw)
         delta_arm = -stick * self.step_arm_linear  # Inverted direction
         self.arm_pos = max(-self.lin_limit, min(self.lin_limit, self.arm_pos + delta_arm))
 
-        # Map boom (-1..1) to boom prismatic position
+        # Map boom (-1..1) to boom prismatic position with dead zone
         # Positive input -> extend boom (positive position)
-        boom = float(self.latest_controls['boom'])
+        boom_raw = float(self.latest_controls['boom'])
+        boom = self.apply_dead_zone(boom_raw)
         delta_boom = boom * self.step_boom_linear
         self.boom_pos = max(-self.boom_limit, min(self.boom_limit, self.boom_pos + delta_boom))
 
-        # Map swing or rotation (-1..1) to body yaw
+        # Map swing or rotation (-1..1) to body yaw with dead zone
         # Prefer swing, fallback to rotation
-        swing = - float(self.latest_controls.get('swing', 0.0))
-        rotation = float(self.latest_controls.get('rotation', 0.0))
+        swing_raw = - float(self.latest_controls.get('swing', 0.0))
+        rotation_raw = float(self.latest_controls.get('rotation', 0.0))
+        # Apply dead zone to both
+        swing = self.apply_dead_zone(swing_raw)
+        rotation = self.apply_dead_zone(rotation_raw)
         # Use swing if available, otherwise use rotation
         body_input = swing if abs(swing) > self.output_epsilon else rotation
         delta_yaw = body_input * self.step_body_yaw
@@ -322,34 +349,12 @@ class TeleopPrismaticPublisher(Node):
         # Map left_track and right_track (-1..1) to track velocities (differential drive model)
         # Dead zone: -0.5 to 0.5 range produces no movement (applied BEFORE scaling)
         # Total input range: -1 to 1, dead zone: -0.5 to 0.5
-        left_track = self.latest_controls.get('left_track', 0.0)
-        right_track = self.latest_controls.get('right_track', 0.0)
-        dead_zone = self.track_dead_zone
-        dead_zone_inv = self.track_dead_zone_inv
+        left_track_raw = self.latest_controls.get('left_track', 0.0)
+        right_track_raw = self.latest_controls.get('right_track', 0.0)
         
-        # Apply dead zone: if input is in [-0.5, 0.5], output is 0
-        # Otherwise, map from [-1, -0.5] U [0.5, 1] to [-1, 1]
-        if abs(left_track) <= dead_zone:
-            left_track = 0.0
-        else:
-            # Map from [-1, -0.5] or [0.5, 1] to [-1, 1]
-            # For positive: map [0.5, 1] -> [0, 1] -> scale to [0, 1] then keep sign
-            # For negative: map [-1, -0.5] -> [-1, 0] -> scale to [-1, 0] then keep sign
-            if left_track > 0:
-                # Map [0.5, 1] -> [0, 1]
-                left_track = (left_track - dead_zone) * dead_zone_inv
-            else:
-                # Map [-1, -0.5] -> [-1, 0]
-                left_track = (left_track + dead_zone) * dead_zone_inv
-        
-        if abs(right_track) <= dead_zone:
-            right_track = 0.0
-        else:
-            # Same mapping for right track
-            if right_track > 0:
-                right_track = (right_track - dead_zone) * dead_zone_inv
-            else:
-                right_track = (right_track + dead_zone) * dead_zone_inv
+        # Apply dead zone using common function
+        left_track = self.apply_dead_zone(left_track_raw)
+        right_track = self.apply_dead_zone(right_track_raw)
         
         # After dead zone processing, left_track and right_track are in [-1, 1] range
         # Now multiply by scale factor to get final velocity
