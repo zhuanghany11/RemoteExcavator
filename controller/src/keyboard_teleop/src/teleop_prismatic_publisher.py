@@ -77,10 +77,10 @@ class TeleopPrismaticPublisher(Node):
 
         # Step sizes per timer tick (0.1s): tune as needed (per-axis)
         self.step_linear = 0.01            # default linear step (fallback)
-        self.step_bucket_linear = 0.03     # meters/tick for bucket
+        self.step_bucket_linear = 0.01     # meters/tick for bucket (reduced for less sensitive control)
         self.step_arm_linear = 0.02        # meters/tick for arm (stick)
-        self.step_boom_linear = 0.02       # meters/tick for boom
-        self.step_body_yaw = 0.04          # radians/tick for body rotation
+        self.step_boom_linear = 0.01       # meters/tick for boom (reduced for less sensitive control)
+        self.step_body_yaw = 0.01          # radians/tick for body rotation (reduced for less sensitive control)
         
         # Track velocity mapping (direct mapping to wheel angular velocity)
         # Default conservative value to avoid instability; configurable via ROS parameter
@@ -212,11 +212,15 @@ class TeleopPrismaticPublisher(Node):
                 if abs(controls['left_track'] - new_val) > epsilon:
                     controls['left_track'] = new_val
                     changed_flag = True
+                    # Print input value for debugging
+                    # self.get_logger().info(f'[INPUT] left_track: {new_val:.3f} (raw: {left_track_val})')
             if right_track_val is not None:
                 new_val = max(-1.0, min(1.0, float(right_track_val)))
                 if abs(controls['right_track'] - new_val) > epsilon:
                     controls['right_track'] = new_val
                     changed_flag = True
+                    # Print input value for debugging
+                    # self.get_logger().info(f'[INPUT] right_track: {new_val:.3f} (raw: {right_track_val})')
             
             # Update other fields (less frequently changed, no change detection needed)
             brake_val = data.get('brake')
@@ -289,15 +293,15 @@ class TeleopPrismaticPublisher(Node):
     def update_positions(self):
         # Positions are already initialized to middle position (0.0) in __init__
         # Map bucket (-1..1) to bucket prismatic position
-        # Positive input -> extend bucket (positive position)
+        # Positive input -> retract bucket (negative position) - direction inverted
         bucket = float(self.latest_controls['bucket'])
-        delta_bucket = bucket * self.step_bucket_linear
+        delta_bucket = -bucket * self.step_bucket_linear  # Inverted direction
         self.bucket_pos = max(-self.lin_limit, min(self.lin_limit, self.bucket_pos + delta_bucket))
 
         # Map stick (-1..1) to arm prismatic position
-        # Positive input -> extend arm (positive position)
+        # Positive input -> retract arm (negative position) - direction inverted
         stick = float(self.latest_controls['stick'])
-        delta_arm = stick * self.step_arm_linear
+        delta_arm = -stick * self.step_arm_linear  # Inverted direction
         self.arm_pos = max(-self.lin_limit, min(self.lin_limit, self.arm_pos + delta_arm))
 
         # Map boom (-1..1) to boom prismatic position
@@ -316,30 +320,40 @@ class TeleopPrismaticPublisher(Node):
         self.body_yaw = max(-self.yaw_limit, min(self.yaw_limit, self.body_yaw + delta_yaw))
         
         # Map left_track and right_track (-1..1) to track velocities (differential drive model)
-        # Direct mapping to wheel angular velocities (rad/s or sim units)
-        # Use cached constants for performance
+        # Dead zone: -0.5 to 0.5 range produces no movement (applied BEFORE scaling)
+        # Total input range: -1 to 1, dead zone: -0.5 to 0.5
         left_track = self.latest_controls.get('left_track', 0.0)
         right_track = self.latest_controls.get('right_track', 0.0)
         dead_zone = self.track_dead_zone
         dead_zone_inv = self.track_dead_zone_inv
         
-        # Dead zone: -0.5 to 0.5 range produces no movement (optimized)
-        abs_left = abs(left_track)
-        if abs_left <= dead_zone:
+        # Apply dead zone: if input is in [-0.5, 0.5], output is 0
+        # Otherwise, map from [-1, -0.5] U [0.5, 1] to [-1, 1]
+        if abs(left_track) <= dead_zone:
             left_track = 0.0
         else:
-            # Scale the remaining range using pre-computed inverse
-            left_track = (left_track - (dead_zone if left_track > 0 else -dead_zone)) * dead_zone_inv
+            # Map from [-1, -0.5] or [0.5, 1] to [-1, 1]
+            # For positive: map [0.5, 1] -> [0, 1] -> scale to [0, 1] then keep sign
+            # For negative: map [-1, -0.5] -> [-1, 0] -> scale to [-1, 0] then keep sign
+            if left_track > 0:
+                # Map [0.5, 1] -> [0, 1]
+                left_track = (left_track - dead_zone) * dead_zone_inv
+            else:
+                # Map [-1, -0.5] -> [-1, 0]
+                left_track = (left_track + dead_zone) * dead_zone_inv
         
-        abs_right = abs(right_track)
-        if abs_right <= dead_zone:
+        if abs(right_track) <= dead_zone:
             right_track = 0.0
         else:
-            # Scale the remaining range using pre-computed inverse
-            right_track = (right_track - (dead_zone if right_track > 0 else -dead_zone)) * dead_zone_inv
+            # Same mapping for right track
+            if right_track > 0:
+                right_track = (right_track - dead_zone) * dead_zone_inv
+            else:
+                right_track = (right_track + dead_zone) * dead_zone_inv
         
+        # After dead zone processing, left_track and right_track are in [-1, 1] range
+        # Now multiply by scale factor to get final velocity
         # Sign convention: forward ≈ -500, backward ≈ +500
-        # Note: direction corrected - positive input now maps to forward (negative velocity)
         scale = self.track_velocity_scale
         self.left_track_velocity = left_track * scale
         self.right_track_velocity = right_track * scale
