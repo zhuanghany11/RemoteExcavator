@@ -7,8 +7,8 @@
                 double radius = 327.0840087890625
             }
             dictionary Perspective = {
-                double3 position = (17.70074103352749, -18.066536681091268, 14.873466736757974)
-                double3 target = (5.484687429618228, -8.762001940345671, 5.732241445425313)
+                double3 position = (28.162496729865246, -27.632697628699812, 19.079654628742812)
+                double3 target = (4.740484655467895, -9.79298178342447, 1.5530542968758994)
             }
             dictionary Right = {
                 double3 position = (9.102229805280327, -50011.284248769734, 3.612152776691489)
@@ -3569,7 +3569,7 @@ def "World"
     {
         quatf xformOp:orient = (1, 0, 0, 0)
         float3 xformOp:scale = (1, 1, 1)
-        double3 xformOp:translate = (11.59725237255802, -10.148563871878638, 0.03761959469610077)
+        double3 xformOp:translate = (11.59725237255802, -13.148563871878638, 0.03761959469610077)
         uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
 
         over "excavator"
