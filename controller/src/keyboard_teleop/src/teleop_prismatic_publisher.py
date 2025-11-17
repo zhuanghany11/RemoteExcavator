@@ -79,8 +79,12 @@ class TeleopPrismaticPublisher(Node):
         self.step_linear = 0.01            # default linear step (fallback)
         self.step_bucket_linear = 0.01     # meters/tick for bucket (reduced for less sensitive control)
         self.step_arm_linear = 0.02        # meters/tick for arm (stick)
-        self.step_boom_linear = 0.01       # meters/tick for boom (reduced for less sensitive control)
+        self.step_boom_linear = 0.008       # meters/tick for boom (reduced for less sensitive control)
         self.step_body_yaw = 0.01          # radians/tick for body rotation (reduced for less sensitive control)
+        
+        # Maximum change per tick to prevent sudden jumps when input changes rapidly
+        # This provides smoother control, especially when joystick returns to center quickly
+        self.max_delta_yaw = 0.05          # Maximum radians change per tick for body rotation
         
         # Track velocity mapping (direct mapping to wheel angular velocity)
         # Default conservative value to avoid instability; configurable via ROS parameter
@@ -126,12 +130,14 @@ class TeleopPrismaticPublisher(Node):
         self.log_count = 0  # Counter to limit total log messages
 
         # Cached constants for performance
-        # Dead zone for all controls: -0.5 to 0.5
-        self.control_dead_zone = 0.5
+        # Dead zone for all controls: set to 0.3 for balanced control
+        # This provides a reasonable dead zone to filter out small joystick drift
+        self.control_dead_zone = 0.3
         self.control_dead_zone_inv = 1.0 / (1.0 - self.control_dead_zone)  # Pre-compute division
-        # Keep track_dead_zone for backward compatibility (same value)
-        self.track_dead_zone = self.control_dead_zone
-        self.track_dead_zone_inv = self.control_dead_zone_inv
+        # Track dead zone: -0.3 to 0.3 (range is -1 to 1)
+        # This means dead zone is 30% of the full range
+        self.track_dead_zone = 0.3
+        self.track_dead_zone_inv = 1.0 / (1.0 - self.track_dead_zone)  # Pre-compute division
         
         # Pre-allocate message object to reduce allocation overhead
         self.joint_msg = JointState()
@@ -295,21 +301,40 @@ class TeleopPrismaticPublisher(Node):
                 self.get_logger().warn(f'Failed to sync joint states: {e}')
 
     def apply_dead_zone(self, input_val):
-        """Apply dead zone to input value (-0.5 to 0.5 range produces 0)
-        Maps [-1, -0.5] U [0.5, 1] to [-1, 1]
+        """Apply dead zone to input value with smooth linear mapping
+        Maps input with dead zone to output range [-1, 1] linearly
+        This provides better linearity compared to the previous hard-cutoff approach
         """
         dead_zone = self.control_dead_zone
         dead_zone_inv = self.control_dead_zone_inv
         
-        if abs(input_val) <= dead_zone:
+        abs_input = abs(input_val)
+        if abs_input <= dead_zone:
             return 0.0
         else:
-            if input_val > 0:
-                # Map [0.5, 1] -> [0, 1]
-                return (input_val - dead_zone) * dead_zone_inv
-            else:
-                # Map [-1, -0.5] -> [-1, 0]
-                return (input_val + dead_zone) * dead_zone_inv
+            # Linear mapping: [dead_zone, 1] -> [0, 1]
+            # This ensures smooth, linear response without sudden jumps
+            sign = 1.0 if input_val > 0 else -1.0
+            normalized = (abs_input - dead_zone) * dead_zone_inv
+            return sign * normalized
+
+    def apply_track_dead_zone(self, input_val):
+        """Apply dead zone specifically for tracks
+        Dead zone: -0.3 to 0.3 (range is -1 to 1)
+        Maps input with dead zone to output range [-1, 1] linearly
+        """
+        dead_zone = self.track_dead_zone
+        dead_zone_inv = self.track_dead_zone_inv
+        
+        abs_input = abs(input_val)
+        if abs_input <= dead_zone:
+            return 0.0
+        else:
+            # Linear mapping: [dead_zone, 1] -> [0, 1]
+            # This ensures smooth, linear response without sudden jumps
+            sign = 1.0 if input_val > 0 else -1.0
+            normalized = (abs_input - dead_zone) * dead_zone_inv
+            return sign * normalized
 
     def update_positions(self):
         # Positions are already initialized to middle position (0.0) in __init__
@@ -344,17 +369,23 @@ class TeleopPrismaticPublisher(Node):
         # Use swing if available, otherwise use rotation
         body_input = swing if abs(swing) > self.output_epsilon else rotation
         delta_yaw = body_input * self.step_body_yaw
+        
+        # Limit maximum change per tick to prevent sudden jumps when joystick returns to center quickly
+        # This ensures smooth, linear control even when input changes rapidly
+        if abs(delta_yaw) > self.max_delta_yaw:
+            delta_yaw = self.max_delta_yaw if delta_yaw > 0 else -self.max_delta_yaw
+        
         self.body_yaw = max(-self.yaw_limit, min(self.yaw_limit, self.body_yaw + delta_yaw))
         
         # Map left_track and right_track (-1..1) to track velocities (differential drive model)
-        # Dead zone: -0.5 to 0.5 range produces no movement (applied BEFORE scaling)
-        # Total input range: -1 to 1, dead zone: -0.5 to 0.5
+        # Dead zone: -0.3 to 0.3 (range is -1 to 1), applied BEFORE scaling
+        # Total input range: -1 to 1, dead zone: -0.3 to 0.3 (30% of full range)
         left_track_raw = self.latest_controls.get('left_track', 0.0)
         right_track_raw = self.latest_controls.get('right_track', 0.0)
         
-        # Apply dead zone using common function
-        left_track = self.apply_dead_zone(left_track_raw)
-        right_track = self.apply_dead_zone(right_track_raw)
+        # Apply track-specific dead zone
+        left_track = self.apply_track_dead_zone(left_track_raw)
+        right_track = self.apply_track_dead_zone(right_track_raw)
         
         # After dead zone processing, left_track and right_track are in [-1, 1] range
         # Now multiply by scale factor to get final velocity
@@ -383,13 +414,28 @@ class TeleopPrismaticPublisher(Node):
             # Use simpler time check to reduce overhead
             current_time = self.get_clock().now().seconds_nanoseconds()[0]
             if current_time - self.last_log_time >= self.log_interval:
+                # Get raw input values for logging (before any processing)
+                bucket_raw = float(self.latest_controls.get('bucket', 0.0))
+                stick_raw = float(self.latest_controls.get('stick', 0.0))
+                boom_raw = float(self.latest_controls.get('boom', 0.0))
+                swing_raw = float(self.latest_controls.get('swing', 0.0))
+                rotation_raw = float(self.latest_controls.get('rotation', 0.0))
+                # body_yaw uses swing (preferred) or rotation, show the one actually used
+                # Note: swing is negated in update_positions, but we show original raw value here
+                body_yaw_raw = swing_raw if abs(swing_raw) > self.output_epsilon else rotation_raw
+                left_track_raw = float(self.latest_controls.get('left_track', 0.0))
+                right_track_raw = float(self.latest_controls.get('right_track', 0.0))
+                
                 # Use % formatting instead of f-strings for better performance with logging
                 self.get_logger().info(
-                    "bucket: %.3f, arm: %.3f, boom: %.3f, body_yaw: %.3f (%.1f°), "
-                    "tracks: L=%.2f R=%.2f" % (
-                        self.bucket_pos, self.arm_pos, self.boom_pos,
-                        self.body_yaw, math.degrees(self.body_yaw),
-                        self.left_track_velocity, self.right_track_velocity
+                    "bucket: raw=%.3f pos=%.3f, arm: raw=%.3f pos=%.3f, boom: raw=%.3f pos=%.3f, "
+                    "body_yaw: raw=%.3f pos=%.3f (%.1f°), tracks: L=raw=%.2f vel=%.2f R=raw=%.2f vel=%.2f" % (
+                        bucket_raw, self.bucket_pos,
+                        stick_raw, self.arm_pos,
+                        boom_raw, self.boom_pos,
+                        body_yaw_raw, self.body_yaw, math.degrees(self.body_yaw),
+                        left_track_raw, self.left_track_velocity,
+                        right_track_raw, self.right_track_velocity
                     )
                 )
                 self.last_log_time = current_time
