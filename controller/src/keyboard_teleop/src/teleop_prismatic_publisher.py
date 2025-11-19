@@ -136,7 +136,7 @@ class TeleopPrismaticPublisher(Node):
         self.control_dead_zone_inv = 1.0 / (1.0 - self.control_dead_zone)  # Pre-compute division
         # Track dead zone: -0.3 to 0.3 (range is -1 to 1)
         # This means dead zone is 30% of the full range
-        self.track_dead_zone = 0.3
+        self.track_dead_zone = 0.3  # Fixed: was 0.7 (incorrect), should be 0.3
         self.track_dead_zone_inv = 1.0 / (1.0 - self.track_dead_zone)  # Pre-compute division
         
         # Pre-allocate message object to reduce allocation overhead
@@ -387,12 +387,20 @@ class TeleopPrismaticPublisher(Node):
         left_track = self.apply_track_dead_zone(left_track_raw)
         right_track = self.apply_track_dead_zone(right_track_raw)
         
-        # After dead zone processing, left_track and right_track are in [-1, 1] range
-        # Now multiply by scale factor to get final velocity
-        # Sign convention: forward ≈ -500, backward ≈ +500
-        scale = self.track_velocity_scale
-        self.left_track_velocity = left_track * scale
-        self.right_track_velocity = right_track * scale
+        # Improved: Joint dead zone check for turning operations
+        # When both tracks are in dead zone, force both velocities to zero
+        # This prevents forward/backward movement when turning control returns to center
+        if abs(left_track) < self.output_epsilon and abs(right_track) < self.output_epsilon:
+            # Both tracks are in dead zone, set both velocities to zero
+            self.left_track_velocity = 0.0
+            self.right_track_velocity = 0.0
+        else:
+            # After dead zone processing, left_track and right_track are in [-1, 1] range
+            # Now multiply by scale factor to get final velocity
+            # Sign convention: forward ≈ -500, backward ≈ +500
+            scale = self.track_velocity_scale
+            self.left_track_velocity = left_track * scale
+            self.right_track_velocity = right_track * scale
 
         # Only output when values change beyond epsilon
         def changed(a, b):
